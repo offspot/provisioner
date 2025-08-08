@@ -3,13 +3,13 @@ import subprocess
 import sys
 from pathlib import Path
 
-from provisioner.constants import RC_ADVANCED, RC_REBOOT, RC_HALT, RC_UI
+from provisioner.constants import RC_ADVANCED, RC_HALT, RC_REBOOT, RC_UI
 
 
 def main() -> int:
-    if not shutil.which("provisioner-ui"):
+    bin_dir = Path(sys.argv[0]).parent
+    if not bin_dir.joinpath("provisioner-ui").exists():
         raise SystemExit("Cant find provisioner-ui")
-    bin_dir = Path(shutil.which("provisioner-ui") or "/bin/echo").parent
     sysctl = shutil.which("systemctl") or "systemctl"
 
     command: list[str] = [str(bin_dir.joinpath("provisioner-ui"))]
