@@ -42,6 +42,16 @@ class BlockDevicesManager:
         self.disks = get_disks_from_devices(get_devices())
         self.images = self.get_images()
 
+
+    def get_disk_from_path(self, path: Path) -> Device:
+        for disk in self.disks.values():
+            if disk.path == path:
+                return disk
+            for partition in disk.partitions:
+                if partition.path == path:
+                    return partition
+        raise KeyError(f"No device with path: {path}")
+
     def get_disk_from_name(self, name: str) -> Device:
         for disk in self.disks.values():
             if disk.name == name:

@@ -61,13 +61,8 @@ class Device:
 
     @property
     def brand(self) -> str:
-        if self.vendor and self.model:
-            return f"{self.vendor} {self.model}"
-        elif self.model:
-            return self.model
-        elif self.vendor:
-            return self.vendor
-        return "Unknown"
+        parts = [p for p in [self.vendor, self.model] if p and p.strip()]
+        return " ".join(parts or ["Unknown"])
 
     @property
     def size_human(self) -> str:

@@ -1,14 +1,18 @@
 import re
+import shutil
+import tempfile
 from enum import StrEnum
 from pathlib import Path
 
 import attrs.validators
 from attrs import define, field
 
+from provisioner.constants import BOOT_ORDER
 from provisioner.context import Context
-from provisioner.utils.misc import run_command
+from provisioner.utils.misc import run_command, run_step_command
 
 context = Context.get()
+logger = context.logger
 
 
 DEVICETREE_PATH = (
@@ -16,6 +20,10 @@ DEVICETREE_PATH = (
     if context.fake_pi
     else Path("/sys/firmware/devicetree/base/")
 )
+BOOTORDER_RE = re.compile(
+    r"^BOOT_ORDER\s*=\s*(?P<value>0X[0-9A-Fa-f]+)\s*$", re.IGNORECASE
+)
+POWEROFFONHALT_RE = re.compile(r"POWER_OFF_ON_HALT\s*=*(?P<value>[0-1])\s")
 
 
 class BootValue(StrEnum):
@@ -48,6 +56,10 @@ class BootOrder:
     def __str__(self) -> str:
         return ", ".join([bv.name for bv in self.entries])
 
+    @classmethod
+    def using(cls, args: list[BootValue]) -> "BootOrder":
+        return cls("0x" + "".join(reversed([bv.value for bv in args])))
+
 
 def get_serial_number() -> str:
     return DEVICETREE_PATH.joinpath("serial-number").read_text().strip().rstrip("\x00")
@@ -64,13 +76,36 @@ def get_bootorder() -> BootOrder:
     for line in ps.stdout.splitlines():
         if not line.strip().startswith("BOOT_ORDER"):
             continue
-        if match := re.match(
-            r"^BOOT_ORDER\s*=\s*(?P<value>0X[0-9A-Fa-f]+)\s*$",
-            line.strip(),
-            re.IGNORECASE,
-        ):
+        if match := BOOTORDER_RE.match(line.strip()):
             return BootOrder(value=match.groupdict()["value"])
     raise OSError("rpi-eeprom-config has no BOOT_ORDER!")
 
 
-def update_eeprom(values: dict[str, str], *, clear: bool = False): ...
+def update_eeprom(*, verbose: bool = False):
+    new_bootorder = BootOrder.using([getattr(BootValue, item) for item in BOOT_ORDER])
+    ps = run_step_command(
+        [shutil.which("rpi-eeprom-config")], capture_output=True, text=True, check=True
+    )
+    new_lines = []
+    for line in ps.stdout.splitlines():
+        if BOOTORDER_RE.match(line.strip()):
+            new_lines.append(f"BOOT_ORDER={new_bootorder.value}")
+        elif POWEROFFONHALT_RE.match(line.strip()):
+            new_lines.append("POWER_OFF_ON_HALT=1")
+        else:
+            new_lines.append(line)
+    config_path = Path(
+        tempfile.NamedTemporaryFile(
+            prefix="epprom_config_", suffix=".txt", delete=False
+        ).name
+    )
+    config_path.write_text("\n".join(new_lines))
+    if verbose:
+        logger.info(f"{config_path=}:\n{config_path.read_text()}")
+    ps = run_step_command(
+        [shutil.which("rpi-eeprom-config"), "--apply", str(config_path)],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    config_path.unlink(missing_ok=True)

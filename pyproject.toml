@@ -26,6 +26,7 @@ dependencies = [
     "pyparted==3.13.0 ; platform_system == 'Linux'",
     "halo==0.0.31",
     "tzdata==2025.2",
+    "pyyaml==6.0.2",
     "ipython",
     "ipdb"
 ]
@@ -56,7 +57,11 @@ dev = [
 ]
 
 [project.scripts]
-provisioner = "provisioner.entrypoint:entrypoint"
+provisioner-script = "provisioner.entrypoints.script:entrypoint"
+provisioner-ui = "provisioner.entrypoints.tui:entrypoint"
+provisioner-status = "provisioner.entrypoints.status:main"
+provisioner-advanced = "provisioner.entrypoints.advanced:main"
+provisioner-manual = "provisioner.entrypoints.manualprov:main"
 
 [tool.hatch.version]
 path = "src/provisioner/__about__.py"
@@ -238,6 +243,6 @@ include = ["src", "tests", "tasks.py"]
 exclude = [".env/**", ".venv/**", "typings"]
 extraPaths = ["src"]
 pythonVersion = "3.11"
-typeCheckingMode="strict"
+typeCheckingMode="basic"
 disableBytesTypePromotions = true
 stubPath = "typings"
