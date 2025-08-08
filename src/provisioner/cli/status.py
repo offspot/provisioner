@@ -76,7 +76,7 @@ def get_internet_cell(internet: InternetCheckResult) -> str:
     return "\n  ".join(rows)
 
 
-def get_images_cell(devmgmt: BlockDevicesManager) -> str:
+def get_images_cell(devmgmt: BlockDevicesManager, *, show_paths: bool = False) -> str:
     rows: list[str] = []
     nb_imgs = len(devmgmt.images)
     total_size = sum([image.size for image in devmgmt.images])
@@ -85,27 +85,39 @@ def get_images_cell(devmgmt: BlockDevicesManager) -> str:
         f"{nb_imgs} images, totaling {format_size(total_size, binary=False)} "
         f"on {nb_disks} disks"
     )
-    for image in devmgmt.images[:3]:
+    for image in devmgmt.images[:10]:
+        path_or_name = (
+            f"[/dev/{image.device}:/{image.relpath}]"
+            if show_paths
+            else f"{devmgmt.get_disk_from_name(image.device)!r} "
+        )
         rows.append(
             f"{padding(format_size(image.size, binary=False), 10)} "
-            f"{padding(image.human, 45, on_end=True)} "
-            f"{devmgmt.get_disk_from_name(image.device)!r} "
-            # f"{image.relpath}"
+            f"{padding(image.human, 45, on_end=True)} {path_or_name}"
         )
     return "\n".join(rows)
 
 
-def get_target_disk_cell(devmgmt: BlockDevicesManager) -> str:
+def get_target_disk_cell(
+    devmgmt: BlockDevicesManager, *, show_paths: bool = False
+) -> str:
     # target_disk_decor = get_warnmiss_decor(host.dev.target_disk)
     if not devmgmt.target_disk:
         return error_text(str(devmgmt.target_disk))
     elif len(devmgmt.target_disks) == 1:
-        return str(devmgmt.target_disk)
+        value = str(devmgmt.target_disk)
+        if show_paths:
+            value += f" [{devmgmt.target_disk.path}]"
+        return value
 
-    return f"{devmgmt.target_disk!s} (+{len(devmgmt.target_disks) -1} other)"
+    value = f"{devmgmt.target_disk!s}"
+    if show_paths:
+        value += f" [{devmgmt.target_disk.path}]"
+    value += f" (+{len(devmgmt.target_disks) -1} other)"
+    return value
 
 
-def main(host: ProvisionHost) -> CliResult:
+def main(host: ProvisionHost, *, show_paths: bool = False) -> CliResult:
     refresh(host)
 
     table = PrettyTable(align="l", header=False)
@@ -149,15 +161,19 @@ def main(host: ProvisionHost) -> CliResult:
         ]
     )
     table.add_divider()
-    table.add_row(["ProvisionOS Disk", host.dev.provisionos_disk])
+    provision_disk_str = str(host.dev.provisionos_disk)
+    if show_paths:
+        provision_disk_str += f" [{host.dev.provisionos_disk.path}]"
+    table.add_row(["ProvisionOS Disk", provision_disk_str])
 
-    table.add_row(["Target Disk", get_target_disk_cell(host.dev)])
-    table.add_row(["Images Founds", get_images_cell(host.dev)])
+    table.add_row(
+        ["Target Disk", get_target_disk_cell(host.dev, show_paths=show_paths)]
+    )
+    table.add_row(["Images Founds", get_images_cell(host.dev, show_paths=show_paths)])
     click.echo(table.get_string())  # pyright: ignore[reportUnknownMemberType]
 
     return CliResult(
         code=0,
-        offer_self_restart=True,
         payload={"auto_provision": host.auto_provision_ready},
     )
 

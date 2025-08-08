@@ -1,5 +1,6 @@
 import datetime
 import os
+import shlex
 import subprocess
 from pathlib import Path
 from subprocess import CompletedProcess
@@ -7,6 +8,11 @@ from typing import Any
 
 import humanfriendly
 from babel.dates import format_datetime
+
+from provisioner.context import Context
+
+context = Context.get()
+logger = context.logger
 
 
 def format_size(size: int, *, binary: bool = False) -> str:
@@ -53,9 +59,40 @@ def find_file(under: Path, named: str) -> Path:
 def get_environ() -> dict[str, str]:
     """current environment variable with langs set to C to control cli output"""
     environ = os.environ.copy()
-    environ.update({"LANG": "C", "LC_ALL": "C"})
+    environ.update(
+        {
+            "LANG": "en_US.UTF-8",
+            "LANGUAGE": "en_US.UTF-8",
+            "LC_ALL": "en_US.UTF-8",
+            "LOCALE": "en_US.UTF-8",
+        }
+    )
     return environ
 
 
 def get_now() -> datetime.datetime:
     return datetime.datetime.now(tz=datetime.UTC)
+
+
+def run_step_command(
+    *args, verbose: bool = False, dont_capture: bool = False, **kwargs
+) -> subprocess.CompletedProcess:
+
+    if verbose:
+        logger.info(f"Running: {shlex.join(*args)}")
+
+    # enable capture output to make it silent if not verbose
+    if not verbose and not kwargs.get("capture_output", False) and not dont_capture:
+        kwargs.update({"capture_output": True})
+
+    # set locale-related env to prevent i18n output without rewritting if passed
+    env = kwargs.get("env", {})
+    for key, value in get_environ().items():
+        if key not in env:
+            env[key] = value
+
+    ps = subprocess.run(*args, **kwargs)  # noqa: PLW1510
+
+    if verbose and kwargs.get("capture_output"):
+        logger.info(f"Captured output ($?={ps.returncode}):\n{ps.stdout}")
+    return ps

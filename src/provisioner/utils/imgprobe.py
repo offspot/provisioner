@@ -15,7 +15,6 @@ from provisioner.utils.loop import (
     get_loopdev,
     is_loopdev_free,
 )
-from provisioner.utils.misc import run_command
 
 try:
     import parted

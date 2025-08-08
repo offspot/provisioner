@@ -21,13 +21,15 @@ class ProvisionHost:
     network: NetworkManager
     clock: ClockManager
 
-    def __init__(self) -> None: ...
+    def __init__(self) -> None:
+        self.ready: bool = False
 
     def query_all(self) -> None:
         self.query_ids()
         self.query_devices()
         self.query_hwclock()
         self.query_network()
+        self.ready = True
 
     def query_ids(self) -> None:
         self.model = get_model()

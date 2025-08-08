@@ -1,6 +1,7 @@
 import argparse
 import signal
 import sys
+from pathlib import Path
 from types import FrameType
 
 from provisioner.__about__ import __version__
@@ -10,7 +11,7 @@ from provisioner.context import Context
 logger = Context.logger
 
 
-def prepare_context(raw_args: list[str]) -> None:
+def prepare_context(raw_args: list[str]) -> tuple[Path, Path, Path]:
     parser = argparse.ArgumentParser(
         prog=NAME_CLI,
         description="Kiwix Hotspot Harwdware Provisioner",
@@ -25,19 +26,21 @@ def prepare_context(raw_args: list[str]) -> None:
     )
 
     parser.add_argument(
-        "--fake-pi",
-        help="[dev] look for Pi-specific files in CWD",
-        action="store_true",
-        dest="fake_pi",
-        default=Context.fake_pi,
+        dest="src_dev",
+        type=Path,
+        help="Source device/partition. Ex: /dev/sda2",
     )
 
     parser.add_argument(
-        "--tty",
-        help="Await user input before exiting",
-        action="store_true",
-        dest="interactive",
-        default=Context.interactive,
+        dest="src_img",
+        type=Path,
+        help="Image path on source device. Ex: /preppers.img",
+    )
+
+    parser.add_argument(
+        dest="target",
+        type=Path,
+        help="Destination device",
     )
 
     parser.add_argument(
@@ -50,20 +53,22 @@ def prepare_context(raw_args: list[str]) -> None:
     args = parser.parse_args(raw_args)
     # ignore unset values in order to not override Context defaults
     args_dict = {key: value for key, value in args._get_kwargs() if value}
+    src_dev = args_dict.pop("src_dev")
+    src_img = args_dict.pop("src_img")
+    target = args_dict.pop("target")
 
     Context.setup(**args_dict)
+    return src_dev, src_img, target
 
 
 def main() -> int:
     debug = Context.debug
     try:
-        prepare_context(sys.argv[1:])
+        src_dev, src_img, target = prepare_context(sys.argv[1:])
         context = Context.get()
         debug = context.debug
 
-        # from provisioner.tui.home import main as main_prog
-        # from provisioner.cli.status import main as main_prog
-        from provisioner.cli.menu import main as main_prog
+        from provisioner.cli.provision_manual import main as main_prog
 
         def exit_gracefully(signum: int, frame: FrameType | None):  # noqa: ARG001
             print("\n", flush=True)
@@ -74,7 +79,11 @@ def main() -> int:
         signal.signal(signal.SIGINT, exit_gracefully)
         signal.signal(signal.SIGQUIT, exit_gracefully)
 
-        return main_prog()
+        return main_prog(
+            source_device_path=src_dev,
+            source_image_path=src_img,
+            target=target,
+        ).code
     except Exception as exc:
         logger.error(f"General failure: {exc!s}")
         if debug:
