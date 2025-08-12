@@ -1,7 +1,5 @@
-import math
 import time
 from collections.abc import Callable
-from ipaddress import IPv4Address
 from typing import TypeAlias
 
 import click
@@ -9,112 +7,23 @@ import questionary
 from attrs import define
 from halo import Halo
 from nmcli import device as nmdevice
-from nmcli.data.device import DeviceWifi
 
-from provisioner.cli.common import CliResult, padding
+from provisioner.cli.common import CliResult
 from provisioner.constants import ETH_IFACE, RC_CANCELED, REGULATORY_DOMAINS, WL_IFACE
 from provisioner.context import Context
 from provisioner.host import ProvisionHost
 from provisioner.utils.misc import run_command
+from provisioner.utils.network import (
+    StaticIPConf,
+    WiFiNetwork,
+    apply_dhcp,
+    apply_static,
+    validate_ip4,
+)
 
 context = Context.get()
 logger = context.logger
-
-# # Changes here are persisting.
-# - Configure Ethernet (eth0)
-# Do you want DHCP or Static?
-#     DHCP
-#         done
-#     STATIC
-#         IP Address Use CIDR for netmask?
-#             GW?
-#                 DNS?
-#                     done
-# - Wireless Country (regulation)
-# - Configure WiFi (wlan0)
-# SSID ? (display list)
-#     Passphrase?
-#         DHCP or STATIC ?
-#             DHCP
-#                 done
-#             STATIC
-#                 IPAddress?
-#                     GW?
-#                         DNS?
-#                             done
-# - Timezone
-# Pick from list/autocomplete
-# - Toggle Telemetry
-# - Reset
-
 Entrypoint: TypeAlias = Callable[[], int]
-
-
-@define
-class WiFiAccessConf:
-    ssid: str
-    passphrase: str | None
-
-
-@define
-class StaticIPConf:
-    address: IPv4Address
-    gateway: IPv4Address
-    dns: IPv4Address
-
-
-@define
-class Feedback:
-    success: bool
-    text: str = ""
-
-
-def apply_dhcp(iface: str) -> Feedback:
-    ps = run_command(
-        [
-            "nmcli",
-            "device",
-            "modify",
-            iface,
-            "ipv4.address",
-            "",
-            "ipv4.gateway",
-            "",
-            "ipv4.dns",
-            "",
-            "ipv4.method",
-            "auto",
-        ]
-    )
-    return Feedback(success=ps.returncode == 0, text=ps.stdout)
-
-
-def apply_static(iface: str, static: StaticIPConf) -> Feedback:
-    ps = run_command(
-        [
-            "nmcli",
-            "device",
-            "modify",
-            iface,
-            "ipv4.address",
-            str(static.address),
-            "ipv4.gateway",
-            str(static.gateway),
-            "ipv4.dns",
-            str(static.dns),
-            "ipv4.method",
-            "auto",
-        ]
-    )
-    return Feedback(success=ps.returncode == 0, text=ps.stdout.splitlines()[-1])
-
-
-def validate_ip4(value: str) -> bool:
-    try:
-        ip = IPv4Address(value)
-        return not ip.is_loopback and not ip.is_multicast
-    except Exception:
-        return False
 
 
 def get_static_config() -> StaticIPConf | None:
@@ -216,78 +125,6 @@ def configure_addressing(iface: str):
                 spinner.succeed(res.text)
             else:
                 spinner.fail(res.text)
-
-
-@define
-class WiFiNetwork:
-    dev: DeviceWifi
-
-    @property
-    def ident(self) -> str:
-        return self.bssid
-
-    @property
-    def connected(self) -> bool:
-        return self.dev.in_use
-
-    @property
-    def ssid(self) -> str:
-        return self.dev.ssid
-
-    @property
-    def bssid(self) -> str:
-        return self.dev.bssid
-
-    @property
-    def signal(self) -> int:
-        return self.dev.signal
-
-    @property
-    def signal_symbol(self) -> str:
-        symbols = ["▁", "▃", "▄", "▅", "▆"]
-        step = self.signal // (100 // len(symbols))
-        return padding("".join(symbols[:step]), len(symbols), on_end=True)
-
-    @property
-    def signal_code(self) -> str:
-        if self.signal >= 90:
-            return "excelent"
-        if self.signal >= 80:
-            return "great"
-        if self.signal >= 70:
-            return "correct"
-        if self.signal >= 50:
-            return "poor"
-        return "bad"
-
-    @property
-    def rate(self) -> int:
-        return self.dev.rate
-
-    @property
-    def speed(self) -> str:
-        return f"{self.rate}Mbps"
-
-    @property
-    def security(self):
-        return self.dev.security or "Open"
-
-    @property
-    def name(self) -> str:
-        return self.dev.ssid or f"Hidden ({self.dev.bssid})"
-
-    @property
-    def freq(self) -> str:
-        nb_giga = math.floor(self.dev.freq / 1000)
-        giga = {2: "2.4"}.get(nb_giga, str(nb_giga))
-        return f"{giga}Ghz"
-
-    def __str__(self) -> str:
-        connected = " (Connected)" if self.connected else ""
-        return (
-            f"{self.signal_symbol} {self.name}{connected} – "  # noqa: RUF001
-            f"{self.security} ({self.freq})"
-        )
 
 
 def configure_wifi(iface: str = WL_IFACE) -> int:

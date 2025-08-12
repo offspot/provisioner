@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import enum
+import math
 import re
 import socket
 from http import HTTPStatus
@@ -10,12 +12,160 @@ import pycountry
 import requests
 from attrs import define
 from nmcli import device as nmdevice
+from nmcli.data.device import DeviceWifi
 
+from provisioner.constants import ETH_IFACE, WL_IFACE
 from provisioner.context import Context
-from provisioner.utils.misc import run_command
+from provisioner.utils.misc import padding, run_command
 
 context = Context.get()
 logger = context.logger
+
+
+class ConnectedTo(enum.StrEnum):
+    none = "Not connected"
+    ethernet = "Wired"
+    wireless = "Wireless"
+    both = "Wired and Wireless"
+
+
+@define
+class WiFiAccessConf:
+    ssid: str
+    passphrase: str | None
+
+
+@define
+class StaticIPConf:
+    address: IPv4Address
+    gateway: IPv4Address
+    dns: IPv4Address
+
+
+@define
+class Feedback:
+    success: bool
+    text: str = ""
+
+
+@define
+class WiFiNetwork:
+    dev: DeviceWifi
+
+    @property
+    def ident(self) -> str:
+        return self.bssid
+
+    @property
+    def connected(self) -> bool:
+        return self.dev.in_use
+
+    @property
+    def ssid(self) -> str:
+        return self.dev.ssid
+
+    @property
+    def bssid(self) -> str:
+        return self.dev.bssid
+
+    @property
+    def signal(self) -> int:
+        return self.dev.signal
+
+    @property
+    def signal_symbol(self) -> str:
+        symbols = ["▁", "▃", "▄", "▅", "▆"]
+        step = self.signal // (100 // len(symbols))
+        return padding("".join(symbols[:step]), len(symbols), on_end=True)
+
+    @property
+    def signal_code(self) -> str:
+        if self.signal >= 90:
+            return "excelent"
+        if self.signal >= 80:
+            return "great"
+        if self.signal >= 70:
+            return "correct"
+        if self.signal >= 50:
+            return "poor"
+        return "bad"
+
+    @property
+    def rate(self) -> int:
+        return self.dev.rate
+
+    @property
+    def speed(self) -> str:
+        return f"{self.rate}Mbps"
+
+    @property
+    def security(self):
+        return self.dev.security or "Open"
+
+    @property
+    def name(self) -> str:
+        return self.dev.ssid or f"Hidden ({self.dev.bssid})"
+
+    @property
+    def freq(self) -> str:
+        nb_giga = math.floor(self.dev.freq / 1000)
+        giga = {2: "2.4"}.get(nb_giga, str(nb_giga))
+        return f"{giga}Ghz"
+
+    def __str__(self) -> str:
+        connected = " (Connected)" if self.connected else ""
+        return (
+            f"{self.signal_symbol} {self.name}{connected} – "  # noqa: RUF001
+            f"{self.security} ({self.freq})"
+        )
+
+
+def apply_dhcp(iface: str) -> Feedback:
+    ps = run_command(
+        [
+            "nmcli",
+            "device",
+            "modify",
+            iface,
+            "ipv4.address",
+            "",
+            "ipv4.gateway",
+            "",
+            "ipv4.dns",
+            "",
+            "ipv4.method",
+            "auto",
+        ]
+    )
+    return Feedback(success=ps.returncode == 0, text=ps.stdout)
+
+
+def apply_static(iface: str, static: StaticIPConf) -> Feedback:
+    ps = run_command(
+        [
+            "nmcli",
+            "device",
+            "modify",
+            iface,
+            "ipv4.address",
+            str(static.address),
+            "ipv4.gateway",
+            str(static.gateway),
+            "ipv4.dns",
+            str(static.dns),
+            "ipv4.method",
+            "auto",
+        ]
+    )
+    return Feedback(success=ps.returncode == 0, text=ps.stdout.splitlines()[-1])
+
+
+def validate_ip4(value: str) -> bool:
+    try:
+        ip = IPv4Address(value)
+        return not ip.is_loopback and not ip.is_multicast
+    except Exception:
+        return False
 
 
 @define(kw_only=True)
@@ -207,6 +357,23 @@ class NetworkManager:
     internet: InternetCheckResult
 
     def __init__(self) -> None: ...
+
+    @property
+    def connected_to(self) -> ConnectedTo:
+        if self.ifaces[ETH_IFACE].connected and self.ifaces[WL_IFACE].connected:
+            return ConnectedTo.both
+        elif self.ifaces[ETH_IFACE].connected:
+            return ConnectedTo.ethernet
+        elif self.ifaces[WL_IFACE].connected:
+            return ConnectedTo.wireless
+        return ConnectedTo.none
+
+    @property
+    def all_good(self) -> bool:
+        return self.internet.https and self.connected_to in (
+            ConnectedTo.ethernet,
+            ConnectedTo.wireless,
+        )
 
     def query(self) -> None:
         self.ifaces = get_interfaces()

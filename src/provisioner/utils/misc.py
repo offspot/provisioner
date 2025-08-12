@@ -49,6 +49,16 @@ def run_command(args: list[str]) -> CompletedProcess[str]:
     )
 
 
+def padding(text: str, size: int, *, on_end: bool = False) -> str:
+    tl = len(text)
+    if tl > size:
+        return text[:size]
+    elif tl < size:
+        pad = (size - tl) * " "
+        return f"{text}{pad}" if on_end else f"{pad}{text}"
+    return text
+
+
 def find_file(under: Path, named: str) -> Path:
     try:
         return next(under.rglob(named))

@@ -155,6 +155,6 @@ def main() -> int:
     signal.signal(signal.SIGINT, exit_gracefully)
     signal.signal(signal.SIGQUIT, exit_gracefully)
 
-    app.start(pane="network")
+    app.start(pane="loading")
 
     return app.exit_code

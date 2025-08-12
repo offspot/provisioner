@@ -30,8 +30,12 @@ class SpinnerText(uw.Text):
     def next_frame(self):
         self.set_text(self.get_next())
 
+    def set_message(self, message: str):
+        self._message = message
+
     def animate(self, loop: uw.MainLoop):
         self.loop = loop
+        self.is_loading = True
 
         async def animator():
             def update(*args):

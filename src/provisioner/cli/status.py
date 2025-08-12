@@ -8,7 +8,6 @@ from prettytable import PrettyTable, TableStyle
 from provisioner.cli.common import (
     CliResult,
     error_text,
-    padding,
     refresh,
     regular_text,
     success_text,
@@ -18,7 +17,7 @@ from provisioner.constants import WL_IFACE
 from provisioner.context import Context
 from provisioner.host import ProvisionHost
 from provisioner.utils.blk.manager import BlockDevicesManager
-from provisioner.utils.misc import format_dt, format_size, yesno
+from provisioner.utils.misc import format_dt, format_size, padding, yesno
 from provisioner.utils.network import Interface, InternetCheckResult
 from provisioner.utils.raspberry import BootValue
 
