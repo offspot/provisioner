@@ -39,5 +39,6 @@ def main() -> int:
             return ps.returncode
     return 0
 
+
 def entrypoint():
     sys.exit(main())

@@ -1,4 +1,3 @@
-
 NAME = "kiwix-provisioner"  # must be filesystem-friendly (technical)
 NAME_CLI = "provisioner"
 NAME_HUMAN = "Hotspot Provisioner"
@@ -113,4 +112,6 @@ ASCII_LOGO = r"""
 ▐░▌       ▐░▌▐░█▄▄▄▄▄▄▄█░▌     ▐░▌      ▄▄▄▄▄▄▄▄▄█░▌▐░▌          ▐░█▄▄▄▄▄▄▄█░▌     ▐░▌     
 ▐░▌       ▐░▌▐░░░░░░░░░░░▌     ▐░▌     ▐░░░░░░░░░░░▌▐░▌          ▐░░░░░░░░░░░▌     ▐░▌     
  ▀         ▀  ▀▀▀▀▀▀▀▀▀▀▀       ▀       ▀▀▀▀▀▀▀▀▀▀▀  ▀            ▀▀▀▀▀▀▀▀▀▀▀       ▀      
-""".strip("\n")
+""".strip(
+    "\n"
+)
