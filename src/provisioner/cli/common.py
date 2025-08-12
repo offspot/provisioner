@@ -36,16 +36,6 @@ def regular_text(text: str):
     return click.style(text, fg="", bg="")
 
 
-def padding(text: str, size: int, *, on_end: bool = False) -> str:
-    tl = len(text)
-    if tl > size:
-        return text[:size]
-    elif tl < size:
-        pad = (size - tl) * " "
-        return f"{text}{pad}" if on_end else f"{pad}{text}"
-    return text
-
-
 def refresh(host: ProvisionHost):
     with Halo(text="Gathering Host information", spinner="line") as spinner:
         host.query_all()

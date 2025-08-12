@@ -3,14 +3,14 @@ import questionary
 from halo import Halo
 from log_symbols.symbols import LogSymbols
 
-from provisioner.cli.common import CliResult, padding
+from provisioner.cli.common import CliResult
 from provisioner.cli.provision_manual import main as main_prog
 from provisioner.constants import RC_CANCELED
 from provisioner.context import Context
 from provisioner.host import ProvisionHost
 from provisioner.utils.blk.devices import Disk
 from provisioner.utils.imgprobe import ImageFileInfo
-from provisioner.utils.misc import format_size
+from provisioner.utils.misc import format_size, padding
 
 context = Context.get()
 logger = context.logger
@@ -18,6 +18,7 @@ logger = context.logger
 CLEAR_LINE: str = Halo.CLEAR_LINE
 SUCC = LogSymbols.SUCCESS.value
 ERR = LogSymbols.ERROR.value
+
 
 def main(host: ProvisionHost) -> CliResult:
 
@@ -50,7 +51,7 @@ def main(host: ProvisionHost) -> CliResult:
         return CliResult(code=RC_CANCELED)
     image = host.dev.images[image_index]
     image_device = host.dev.get_disk_from_name(image.device)
-    image_phy_disk = getattr(image_device, "disk") or image_device
+    image_phy_disk = image_device.disk or image_device
 
     click.echo("Image: ", nl=False)
     click.secho(image.linux.release, fg="magenta", nl=False)
@@ -100,9 +101,9 @@ def main(host: ProvisionHost) -> CliResult:
         return CliResult(code=RC_CANCELED)
 
     return main_prog(
-            source_device_path=image_device.path,
-            source_image_path=image.relpath,
-            target=target_disk.path,
-        )
+        source_device_path=image_device.path,
+        source_image_path=image.relpath,
+        target=target_disk.path,
+    )
 
     return CliResult(code=0)

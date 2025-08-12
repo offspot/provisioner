@@ -27,10 +27,9 @@ def _exception_handler(loop, context):
             + "".join(traceback.format_tb(exception.__traceback__))
         )
         # self.chatbox = LoadingChatBox(message)
-    except Exception as exc:
+    except Exception:
         ...
         # self.chatbox = LoadingChatBox('Unable to show exception: ' + str(exc))
-    return
 
 
 class ExceptionHandlingLoop(uw.AsyncioEventLoop):
@@ -47,7 +46,7 @@ class App:
     palette = (
         # name, foreground, background, mono, foreground_high, background_high
         ("banner", "", "", "", "#ffa", "#FD5"),
-        ("streak", "", "", "", "white", "#f70"),
+        ("streak", "", "", "", "white,bold", "#f70"),
         ("inside", "", "", "", "", "#EB2"),
         ("outside", "", "", "", "", "#FD5"),
         ("bg", "", "", "", "", "#f70"),
@@ -70,12 +69,19 @@ class App:
         ("popup_confirm_btn_focus", "", "", "", "white", "#1bf"),
         ("popup_confirm_btn_lines", "", "", "", "black", "#1bf"),
         ("popup_confirm_btn_lines_focus", "", "", "", "white", "#1bf"),
+        ("excelent-signal", "", "", "", "#008300", "#f70"),
+        ("great-signal", "", "", "", "#008300", "#f70"),
+        ("correct-signal", "", "", "", "#ffff00", "#f70"),
+        ("poor-signal", "", "", "", "#ff0000", "#f70"),
+        ("bad-signal", "", "", "", "#ff0000", "#f70"),
+        ("success-status", "", "", "", "#008300,bold", "#f70"),
+        ("error-status", "", "", "", "#f00", "#f70"),
     )
 
     def __init__(self) -> None:
         self.exit_code = 1
         self.host = ProvisionHost()
-        self.placeholder = uw.SolidFill("bg")
+        self.placeholder = uw.SolidFill()
         self.custom_loop = ExceptionHandlingLoop(loop=aio_loop)
         self.custom_loop.set_exception_handler(_exception_handler)
         self.uloop = uw.MainLoop(
@@ -96,7 +102,7 @@ class App:
             if self.uloop:
                 aio_loop.stop()
                 self.uloop.stop()
-        print(f"Received {key=}", flush=True)
+        # print(f"Received {key=}", flush=True)
 
     def reset_ui(self):
         self.uloop.widget = uw.AttrMap(self.placeholder, "bg")
@@ -108,9 +114,12 @@ class App:
         self.reset_ui()
         self.update()
         from provisioner.tui.loading import LoadingPane
+        from provisioner.tui.network import NetworkPane
         from provisioner.tui.pane import ExitPane
 
-        self.pane = {"loading": LoadingPane, "exit": ExitPane}[pane](self)
+        self.pane = {"loading": LoadingPane, "exit": ExitPane, "network": NetworkPane}[
+            pane
+        ](self)
 
     def update(self):
         try:

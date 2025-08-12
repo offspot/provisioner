@@ -6,7 +6,7 @@ from provisioner.tui.app import App
 class Pane:
     def __init__(self, app: App) -> None:
         self.app = app
-        self.main_widget : uw.Widget = self.app.placeholder
+        self.main_widget: uw.Widget = self.app.placeholder
         self.render()
         self.uloop.widget.original_widget = self.main_widget
 

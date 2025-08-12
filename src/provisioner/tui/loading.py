@@ -5,7 +5,7 @@ from threading import Thread
 
 import urwid as uw
 
-from provisioner.constants import ASCII_LOGO, RC_ADVANCED, RC_REBOOT, RC_HALT
+from provisioner.constants import ASCII_LOGO, RC_ADVANCED, RC_HALT, RC_REBOOT
 from provisioner.host import ProvisionHost
 from provisioner.tui.boxbutton import BoxButton, ConfirmingBoxButton
 from provisioner.tui.pane import Pane
@@ -78,6 +78,14 @@ class LoadingPane(Pane):
             f"S/N: {self.host.serial_number.upper()}"
         )
         self.update()
+        warning = "" if self.host.network.all_good else "⚠️  "
+        self.menu.contents.insert(
+            0,
+            (
+                BoxButton(f"{warning}Network", self.on_network_selected),
+                (uw.WHSettings.WEIGHT, 25, True),
+            ),
+        )
         self.menu.contents.insert(
             0,
             (
@@ -90,6 +98,9 @@ class LoadingPane(Pane):
 
     def on_provision_selected(self, arg):
         print(f"PROV: {arg}")
+
+    def on_network_selected(self, arg):
+        self.app.switch_to("network")
 
     def on_restart_selected(self, arg):
         self.app.stop(exit_code=RC_REBOOT)

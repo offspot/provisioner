@@ -9,6 +9,7 @@ from provisioner.utils.yaml import yaml_dump, yaml_load
 context = Context.get()
 logger = context.logger
 
+
 class OffspotYAMLStep(Step):
 
     ident: str = "offspot"

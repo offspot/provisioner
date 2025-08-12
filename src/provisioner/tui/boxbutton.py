@@ -5,6 +5,7 @@ import urwid as uw
 if typing.TYPE_CHECKING:
     from urwid.widget.popup import PopUpParametersModel
 else:
+
     class PopUpParametersModel(dict): ...
 
 

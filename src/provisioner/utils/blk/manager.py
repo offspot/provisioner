@@ -42,7 +42,6 @@ class BlockDevicesManager:
         self.disks = get_disks_from_devices(get_devices())
         self.images = self.get_images()
 
-
     def get_disk_from_path(self, path: Path) -> Device:
         for disk in self.disks.values():
             if disk.path == path:

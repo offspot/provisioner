@@ -59,9 +59,11 @@ class Context:
             level=logging.DEBUG if debug else logging.INFO,
             format="%(asctime)s %(levelname)s | %(message)s",
         )
+
         def handle_exc(msg, *args, **kwargs):
             cls.logger.debug(msg, *args, exc_info=True, **kwargs)
-        cls.logger.exception =handle_exc
+
+        cls.logger.exception = handle_exc
 
     @classmethod
     def get(cls) -> "Context":
