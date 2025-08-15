@@ -54,6 +54,26 @@ class ProvisionHost:
         self.clock.query()
 
     @property
-    def auto_provision_ready(self) -> bool:
-        # TODO
-        return self.clock.tdctl.all_good and bool(self.dev.target_disk)
+    def provision_ready(self) -> tuple[bool, str]:
+        if not self.dev.nvme_target_disks:
+            return False, "No target disk present"
+        elif len(self.dev.nvme_target_disks) > 1:
+            return (
+                False,
+                "Multiple target disks present:\n"
+                f"{','.join([str(d) for d in self.dev.nvme_target_disks])}",
+            )
+
+        if not self.dev.has_at_least_one_image:
+            if not self.dev.source_disks:
+                return False, "No source image disk present"
+            return False, "No image found"
+        if not self.network.internet.https:
+            return False, "No Internet connection"
+        if self.network.is_not_connected:
+            return False, "Not connected to network"
+        if self.network.is_multi_connected:
+            return False, "Is connected to multiple networks"
+        if not self.clock.tdctl.ntp_synced:
+            return False, "Clock not synced (requires Internet)"
+        return True, ""

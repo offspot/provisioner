@@ -173,7 +173,7 @@ def main(host: ProvisionHost, *, show_paths: bool = False) -> CliResult:
 
     return CliResult(
         code=0,
-        payload={"auto_provision": host.auto_provision_ready},
+        payload={"auto_provision": host.provision_ready[0]},
     )
 
     return 0
