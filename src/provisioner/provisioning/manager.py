@@ -3,7 +3,7 @@ from collections.abc import Generator
 
 from provisioner.context import Context
 from provisioner.provisioning.bootorder import BootOrderStep
-from provisioner.provisioning.common import Environment, Step
+from provisioner.provisioning.common import Environment, ImplementsProgress, Step
 from provisioner.provisioning.docker import DockerStep
 from provisioner.provisioning.hwclock import HardwareClockStep
 from provisioner.provisioning.imager import PiImagerStep
@@ -24,8 +24,13 @@ class ProvisionManager:
         DockerStep,
     )
 
-    def __init__(self, environment: Environment):
+    def __init__(
+        self,
+        environment: Environment,
+        progressbar: ImplementsProgress | None = None,
+    ):
         self.environment = environment
+        self.progressbar: ImplementsProgress | None = progressbar
 
         self.steps: dict[str, Step] = {}
         self.step_index = -1
@@ -41,6 +46,7 @@ class ProvisionManager:
                     environment=self.environment,
                     step_index=self.step_index,
                     total_steps=len(self.STEPS),
+                    progressbar=self.progressbar,
                 )
                 return self.steps[ident]
         raise KeyError(f"No step for {ident}")

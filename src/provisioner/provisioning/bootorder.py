@@ -10,6 +10,8 @@ class BootOrderStep(Step):
 
     ident: str = "boot"
     name: str = "Change BOOT_ORDER and POWER_ON_HALT"
+    reports_progress: bool = False
+    progress_interval_ms: int = 1000
 
     def run(self, *, verbose: bool = False) -> StepResult:
         try:

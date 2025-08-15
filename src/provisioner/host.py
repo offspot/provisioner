@@ -1,6 +1,9 @@
+import datetime
+
 from provisioner.context import Context
 from provisioner.utils.blk.manager import BlockDevicesManager
 from provisioner.utils.clock import ClockManager
+from provisioner.utils.misc import get_now
 from provisioner.utils.network import NetworkManager
 from provisioner.utils.raspberry import (
     BootOrder,
@@ -22,7 +25,8 @@ class ProvisionHost:
     clock: ClockManager
 
     def __init__(self) -> None:
-        self.ready: bool = False
+        self.ready = False
+        self.queried_on = datetime.datetime(2025, 1, 1, tzinfo=datetime.UTC)
 
     def query_all(self) -> None:
         self.query_ids()
@@ -30,6 +34,7 @@ class ProvisionHost:
         self.query_hwclock()
         self.query_network()
         self.ready = True
+        self.queried_on = get_now()
 
     def query_ids(self) -> None:
         self.model = get_model()

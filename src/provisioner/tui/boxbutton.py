@@ -63,7 +63,6 @@ class ConfirmPopupDialog(uw.WidgetWrap):
         uw.connect_signal(
             cancel_button.hidden_button, "click", lambda btn: self._emit("close")
         )
-        question = uw.Text(question_text, align=uw.CENTER)
         question = uw.AttrMap(uw.Text(question_text), "popup_question")
         pile = uw.Pile(
             [
@@ -113,6 +112,68 @@ class ConfirmingBoxButton(uw.PopUpLauncher):
             cancel_label=self.cancel_label,
         )
         uw.connect_signal(pop_up, "close", lambda btn: self.close_pop_up())
+        return pop_up
+
+    def get_pop_up_parameters(self) -> PopUpParametersModel:
+        return {"left": 0, "top": 1, "overlay_width": 40, "overlay_height": 10}
+
+
+class InfoPopupDialog(uw.WidgetWrap):
+
+    signals: typing.ClassVar[list[str]] = ["close"]
+
+    def __init__(
+        self,
+        message: str = "n/a",
+        btn_label: str = "Ok",
+    ):
+        button = BoxButton(
+            btn_label,
+            label_palette_id="popup_confirm_btn",
+            lines_palette_id="popup_confirm_btn_lines",
+        )
+        uw.connect_signal(button.hidden_button, "click", lambda _: self._emit("close"))
+        question = uw.AttrMap(uw.Text(message), "popup_question")
+        pile = uw.Pile(
+            [
+                uw.Divider(top=0, bottom=0),
+                question,
+                uw.Divider(top=0, bottom=0),
+                uw.Columns([button]),
+            ]
+        )
+        super().__init__(
+            uw.AttrMap(
+                uw.Filler(uw.Padding(pile, left=1, right=1), valign=uw.TOP), "popup"
+            )
+        )
+
+    def keypress(self, size: tuple[int], key: str) -> str | None:
+        if key == "esc":
+            self._emit("close")
+        return super().keypress(size=size, key=key)
+
+
+class InfoPopupBoxButton(uw.PopUpLauncher):
+    def __init__(
+        self,
+        label: str,
+        message: str = "n/a",
+        btn_label: str = "Ok",
+    ) -> None:
+        super().__init__(BoxButton(label=f"{label}", label_palette_id="confirm_btn"))
+        self.message = message
+        self.btn_label = btn_label
+        uw.connect_signal(
+            self.original_widget.hidden_button, "click", lambda _: self.open_pop_up()
+        )
+
+    def create_pop_up(self) -> ConfirmPopupDialog:
+        pop_up = InfoPopupDialog(
+            message=self.message,
+            btn_label=self.btn_label,
+        )
+        uw.connect_signal(pop_up, "close", lambda _: self.close_pop_up())
         return pop_up
 
     def get_pop_up_parameters(self) -> PopUpParametersModel:

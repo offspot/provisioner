@@ -50,6 +50,9 @@ class App:
         ("inside", "", "", "", "", "#EB2"),
         ("outside", "", "", "", "", "#FD5"),
         ("bg", "", "", "", "", "#f70"),
+        ("bg_prov", "", "", "", "white", "#000"),
+        ("highlight_prov", "", "", "", "white,bold", "#000"),
+        ("disabled_prov", "", "", "", "#cfcfcf", "#000"),
         ("logo", "white", "", "", "white", "#f70"),
         ("btn_lines", "", "", "", "#000", "#f70"),
         ("btn_lines_focus", "", "", "", "#fff", "#f70"),
@@ -76,6 +79,12 @@ class App:
         ("bad-signal", "", "", "", "#ff0000", "#f70"),
         ("success-status", "", "", "", "#008300,bold", "#f70"),
         ("error-status", "", "", "", "#f00", "#f70"),
+        ("pg normal", "", "", "", "white", "black"),
+        ("pg complete", "", "", "", "white", "#ff00ff"),
+        ("pg smooth", "", "", "", "#ff00ff", "black"),
+        ("prov success", "", "", "", "white", "#008300"),
+        ("prov error", "", "", "", "white", "#f00"),
+        ("prov spinner", "", "", "", "#ff00ff", "black"),
     )
 
     def __init__(self) -> None:
@@ -99,6 +108,8 @@ class App:
 
     def on_unhandled_input(self, key: str | tuple[str, int, int, int]) -> None:
         if key in {"q", "Q"}:
+            if self.pane:
+                self.pane.stop()
             if self.uloop:
                 aio_loop.stop()
                 self.uloop.stop()
@@ -116,10 +127,14 @@ class App:
         from provisioner.tui.loading import LoadingPane
         from provisioner.tui.network import NetworkPane
         from provisioner.tui.pane import ExitPane
+        from provisioner.tui.provision import ProvisionPane
 
-        self.pane = {"loading": LoadingPane, "exit": ExitPane, "network": NetworkPane}[
-            pane
-        ](self)
+        self.pane = {
+            "loading": LoadingPane,
+            "exit": ExitPane,
+            "network": NetworkPane,
+            "provision": ProvisionPane,
+        }[pane](self)
 
     def update(self):
         try:

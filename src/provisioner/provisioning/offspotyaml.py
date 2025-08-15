@@ -14,6 +14,8 @@ class OffspotYAMLStep(Step):
 
     ident: str = "offspot"
     name: str = "Update offspot.yaml for runtime configuration"
+    reports_progress: bool = False
+    progress_interval_ms: int = 1000
 
     def run(self, *, verbose: bool = False) -> StepResult:
         root_dev = self.environment.target_disk.path  # /dev/nvme0n1

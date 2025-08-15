@@ -8,6 +8,8 @@ class HardwareClockStep(Step):
 
     ident: str = "hwclock"
     name: str = "Set Hardware clock to current time"
+    reports_progress: bool = False
+    progress_interval_ms: int = 1000
 
     def run(self, *, verbose: bool = False) -> StepResult:
         ci = self.environment.host.clock.tdctl

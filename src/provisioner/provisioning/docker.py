@@ -40,6 +40,8 @@ class DockerStep(Step):
 
     ident: str = "docker"
     name: str = "Load OCI images onto Docker"
+    reports_progress: bool = False
+    progress_interval_ms: int = 1000
 
     def run(self, *, verbose: bool = False) -> StepResult:
         root_dev = self.environment.target_disk.path  # /dev/nvme0n1

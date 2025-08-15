@@ -1,6 +1,8 @@
 import datetime
+import math
 import os
 import shlex
+import shutil
 import subprocess
 from pathlib import Path
 from subprocess import CompletedProcess
@@ -9,6 +11,7 @@ from typing import Any
 import humanfriendly
 from babel.dates import format_datetime
 
+from provisioner.constants import USB_BUS_SPEED_PER_SECOND
 from provisioner.context import Context
 
 context = Context.get()
@@ -106,3 +109,24 @@ def run_step_command(
     if verbose and kwargs.get("capture_output"):
         logger.info(f"Captured output ($?={ps.returncode}):\n{ps.stdout}")
     return ps
+
+
+def get_estimated_duration(size: int) -> int:
+    one_minute = 60
+
+    def round_to_mn(seconds: int | float) -> int:
+        return math.ceil(seconds / one_minute) * one_minute
+
+    speed_second = humanfriendly.parse_size(USB_BUS_SPEED_PER_SECOND)
+    # we estimate the process to twice the duration of writing
+    # because of the verify step.
+    # verify step is faster than writing (reads from NVME vs writing through USB)
+    # but twice this amount proved to provide a realistic estimate
+    # imager does additional stuff not accounted for otherwise
+    nb_seconds = round_to_mn((size * 2) / speed_second)
+    extra_seconds = one_minute  # rest of process
+    return round_to_mn(nb_seconds + extra_seconds)  # round to minute
+
+
+def playsounds(fpaths: list[Path]):
+    run_command([shutil.which("aplay") or "aplay", *[str(fpath) for fpath in fpaths]])

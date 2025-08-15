@@ -115,3 +115,8 @@ ASCII_LOGO = r"""
 """.strip(
     "\n"
 )
+
+USB_BUS_SPEED_PER_SECOND = "375MiB"
+
+SUCCESS_SOUNDS = ["notification.wav", "provision_succeeded.wav"]
+FAILURE_SOUNDS = ["error.wav", "provision_failed.wav"]
