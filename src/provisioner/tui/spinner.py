@@ -5,16 +5,17 @@ class SpinnerText(uw.Text):
     _steps = ("⠄", "⠆", "⠇", "⠋", "⠙", "⠸", "⠰", "⠠")
     _interval_ms = 80
 
-    def __init__(self, message: str, *args, **kwargs):
+    def __init__(self, message: str, style: str = "streak", *args, **kwargs):
         self.loop = None
         self.is_loading = True
         self._index = -1
         self._message = message
+        self._style = style
         super().__init__(self.get_next(), *args, **kwargs)
 
     def done(self, message: str):
         self.is_loading = False
-        self.set_text(message)
+        self.set_text((self._style, message))
 
     @property
     def _interval(self) -> float:
@@ -25,7 +26,7 @@ class SpinnerText(uw.Text):
             self._index = 0
         else:
             self._index += 1
-        return ("streak", f"{self._steps[self._index]} {self._message}")
+        return (self._style, f"{self._steps[self._index]} {self._message}")
 
     def next_frame(self):
         self.set_text(self.get_next())
