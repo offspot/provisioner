@@ -12,6 +12,8 @@ class ResizePartitionStep(Step):
 
     ident: str = "resize-data"
     name: str = "Resize Hotspot's third partition"
+    reports_progress: bool = False
+    progress_interval_ms: int = 1000
 
     def run(self, *, verbose: bool = False) -> StepResult:
 

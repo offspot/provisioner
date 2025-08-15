@@ -1,13 +1,9 @@
-import asyncio
-import time
-import traceback
 from threading import Thread
 
 import urwid as uw
 
 from provisioner.constants import ASCII_LOGO, RC_ADVANCED, RC_HALT, RC_REBOOT
-from provisioner.host import ProvisionHost
-from provisioner.tui.boxbutton import BoxButton, ConfirmingBoxButton
+from provisioner.tui.boxbutton import BoxButton, ConfirmingBoxButton, InfoPopupBoxButton
 from provisioner.tui.pane import Pane
 from provisioner.tui.spinner import SpinnerText
 
@@ -78,18 +74,26 @@ class LoadingPane(Pane):
             f"S/N: {self.host.serial_number.upper()}"
         )
         self.update()
-        warning = "" if self.host.network.all_good else "⚠️  "
+        net_warning = "" if self.host.network.all_good else "⚠️  "
         self.menu.contents.insert(
             0,
             (
-                BoxButton(f"{warning}Network", self.on_network_selected),
+                BoxButton(f"{net_warning}Network", self.on_network_selected),
                 (uw.WHSettings.WEIGHT, 25, True),
             ),
         )
+        ready, message = self.host.provision_ready
         self.menu.contents.insert(
             0,
             (
-                BoxButton("Provision", self.on_provision_selected),
+                (
+                    BoxButton("Provision", self.on_provision_selected)
+                    if ready
+                    else InfoPopupBoxButton(
+                        label="🚫  Provision",
+                        message=f"Unable to provision:\n{message}",
+                    )
+                ),
                 (uw.WHSettings.WEIGHT, 25, True),
             ),
         )
@@ -97,7 +101,7 @@ class LoadingPane(Pane):
         self.update()
 
     def on_provision_selected(self, arg):
-        print(f"PROV: {arg}")
+        self.app.switch_to("provision")
 
     def on_network_selected(self, arg):
         self.app.switch_to("network")

@@ -370,10 +370,19 @@ class NetworkManager:
 
     @property
     def all_good(self) -> bool:
-        return self.internet.https and self.connected_to in (
-            ConnectedTo.ethernet,
-            ConnectedTo.wireless,
+        return (
+            self.internet.https
+            and not self.is_not_connected
+            and not self.is_multi_connected
         )
+
+    @property
+    def is_multi_connected(self) -> bool:
+        return self.connected_to == ConnectedTo.both
+
+    @property
+    def is_not_connected(self) -> bool:
+        return self.connected_to == ConnectedTo.none
 
     def query(self) -> None:
         self.ifaces = get_interfaces()

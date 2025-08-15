@@ -1,6 +1,7 @@
 import logging
 import os
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 import humanfriendly
@@ -40,6 +41,7 @@ class Context:
     min_img_size: int = DEFAULT_MIN_IMG_SIZE
 
     logger: logging.Logger = logging.getLogger(NAME)  # noqa: RUF009
+    audio_dir: Path = Path(__file__).parent.joinpath("audio")  # noqa: RUF009
 
     @classmethod
     def setup(cls, **kwargs: Any):
