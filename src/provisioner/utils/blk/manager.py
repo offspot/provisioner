@@ -38,6 +38,22 @@ class BlockDevicesManager:
         self.disks: dict[str, Disk] = {}
         self.images: list[ImageFileInfo] = []
 
+    @property
+    def has_single_target(self) -> bool:
+        return len(self.target_disks) == 1
+
+    @property
+    def has_at_least_one_target(self) -> bool:
+        return len(self.target_disks) >= 1
+
+    @property
+    def has_at_least_one_image(self) -> bool:
+        return len(self.images) >= 1
+
+    @property
+    def has_single_image(self) -> bool:
+        return len(self.images) == 1
+
     def query(self):
         self.disks = get_disks_from_devices(get_devices())
         self.images = self.get_images()
@@ -221,6 +237,14 @@ class BlockDevicesManager:
         target_disks = sorted(target_disks, key=comp_by_tech_and_size)
 
         return list(target_disks)
+
+    @property
+    def nvme_target_disks(self) -> list[Disk]:
+        return list(filter(lambda disk: disk.transport == "NVME", self.target_disks))
+
+    @property
+    def nvme_target_disk(self) -> Disk:
+        return self.target_disks[0]
 
     @property
     def target_disk(self) -> Disk | None:
