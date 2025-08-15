@@ -2,7 +2,6 @@ from pathlib import Path
 
 import click
 from halo import Halo
-from humanfriendly import format_size, format_timespan
 
 from provisioner.cli.common import CliResult, refresh
 from provisioner.context import Context
@@ -10,6 +9,7 @@ from provisioner.host import ProvisionHost
 from provisioner.provisioning.common import Environment
 from provisioner.provisioning.manager import ProvisionManager
 from provisioner.utils.blk.devices import Disk
+from provisioner.utils.misc import format_duration, format_size
 
 logger = Context.logger
 
@@ -122,7 +122,7 @@ def main(
     click.echo(
         f"  Image: {image.name} (/dev/{image.device}:{image.relpath})\n"
         f"  Target disk: {target_disk} ({target_disk.path})\n"
-        f"  Duration: {format_timespan(manager.duration)}"
+        f"  Duration: {format_duration(manager.duration)}"
     )
     click.echo("Please reboot.")
 
