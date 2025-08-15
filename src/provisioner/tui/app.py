@@ -136,9 +136,7 @@ class App:
 
     def stop(self, exit_code: int):
         self.exit_code = exit_code
-        if self.uloop:
-            aio_loop.stop()
-            self.uloop.stop()
+        self.on_unhandled_input(key="q")
 
 
 def main() -> int:
