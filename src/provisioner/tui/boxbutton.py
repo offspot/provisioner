@@ -61,7 +61,7 @@ class ConfirmPopupDialog(uw.WidgetWrap):
             lines_palette_id="popup_confirm_btn_lines",
         )
         uw.connect_signal(
-            cancel_button.hidden_button, "click", lambda btn: self._emit("close")
+            cancel_button.hidden_button, "click", lambda _: self._emit("close")
         )
         question = uw.AttrMap(uw.Text(question_text), "popup_question")
         pile = uw.Pile(
@@ -101,7 +101,7 @@ class ConfirmingBoxButton(uw.PopUpLauncher):
         self.cancel_label = cancel_label
         self.on_confirm = on_press
         uw.connect_signal(
-            self.original_widget.hidden_button, "click", lambda btn: self.open_pop_up()
+            self.original_widget.hidden_button, "click", lambda _: self.open_pop_up()
         )
 
     def create_pop_up(self) -> ConfirmPopupDialog:
@@ -111,7 +111,7 @@ class ConfirmingBoxButton(uw.PopUpLauncher):
             confirm_label=self.confirm_label,
             cancel_label=self.cancel_label,
         )
-        uw.connect_signal(pop_up, "close", lambda btn: self.close_pop_up())
+        uw.connect_signal(pop_up, "close", lambda _: self.close_pop_up())
         return pop_up
 
     def get_pop_up_parameters(self) -> PopUpParametersModel:

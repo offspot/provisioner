@@ -2,7 +2,6 @@ from collections.abc import Callable
 from typing import Any
 
 import click
-from halo import Halo
 from prettytable import PrettyTable, TableStyle
 
 from provisioner.cli.common import (

@@ -22,7 +22,7 @@ context = Context.get()
 logger = Context.logger
 
 
-def noop(host: ProvisionHost) -> CliResult:
+def noop(host: ProvisionHost) -> CliResult:  # noqa: ARG001
     return CliResult(code=0)
 
 

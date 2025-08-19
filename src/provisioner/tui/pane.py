@@ -18,8 +18,7 @@ class Pane:
     def uloop(self):
         return self.app.uloop
 
-    def stop(self):
-        ...
+    def stop(self): ...
 
     def update(self):
         self.app.update()

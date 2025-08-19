@@ -39,7 +39,7 @@ class SpinnerText(uw.Text):
         self.is_loading = True
 
         async def animator():
-            def update(*args):
+            def update(*args):  # noqa: ARG001
                 if self.is_loading:
                     self.next_frame()
                     self.loop.set_alarm_in(self._interval, update)

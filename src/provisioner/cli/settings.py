@@ -127,7 +127,7 @@ def configure_addressing(iface: str):
                 spinner.fail(res.text)
 
 
-def configure_wifi(iface: str = WL_IFACE) -> int:
+def configure_wifi(iface: str = WL_IFACE) -> int:  # noqa: ARG001
     enter_choice = questionary.Choice(title="Enter SSID manually", value=":manual:")
     cancel_choice = questionary.Choice(title="Cancel", value="cancel")
     with Halo(text="Finding WiFi networks", spinner="dots"):
@@ -214,7 +214,7 @@ class Setting:
         return questionary.Choice(title=self.name, value=key or self.name)
 
 
-def main(host: ProvisionHost) -> CliResult:
+def main(host: ProvisionHost) -> CliResult:  # noqa: ARG001
 
     click.secho(
         r"/!\ Settings are stored on the ProvisionOS and are thus persistent.",

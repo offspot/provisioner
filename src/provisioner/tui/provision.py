@@ -185,7 +185,7 @@ class ProvisionPane(Pane):
 
         self.update()
 
-    def on_image_selected(self, image: ImageFileInfo, *args):
+    def on_image_selected(self, image: ImageFileInfo, *args):  # noqa: ARG002
         self.image = image
         self.menu.contents.clear()
         self.header_text = uw.Text("Confirm provisioning", align=uw.Align.CENTER)
@@ -202,7 +202,8 @@ class ProvisionPane(Pane):
         self.menu.contents.append(
             (
                 uw.Text(
-                    f"{padding('Device', 10, on_end=True)}: {self.host.model} – S/N: {self.host.serial_number.upper()}",
+                    f"{padding('Device', 10, on_end=True)}: {self.host.model}"
+                    f" – S/N: {self.host.serial_number.upper()}",  # noqa: RUF001
                     align=uw.Align.LEFT,
                 ),
                 self.std_option,
@@ -211,7 +212,8 @@ class ProvisionPane(Pane):
         self.menu.contents.append(
             (
                 uw.Text(
-                    f"{padding('Image', 10, on_end=True)}: {format_size(self.image.size)} {self.image.name}",
+                    f"{padding('Image', 10, on_end=True)}: "
+                    f"{format_size(self.image.size)} {self.image.name}",
                     align=uw.Align.LEFT,
                 ),
                 self.std_option,
@@ -276,11 +278,11 @@ class ProvisionPane(Pane):
         self.menu.focus_position = len(self.menu.contents) - 1
         self.update()
 
-    def on_cancel(self, *args):
+    def on_cancel(self, *args):  # noqa: ARG002
         # self.app.switch_to("loading")
         self.render_image_chooser()
 
-    def on_confirm(self, *args):
+    def on_confirm(self, *args):  # noqa: ARG002
         self.header_text.set_text("Provisioning")
         # remove menu, divider and title text
         self.menu.contents.pop()
@@ -303,9 +305,7 @@ class ProvisionPane(Pane):
         )
         self.menu.contents.append(
             (
-                uw.Text(
-                    f"{padding('ETA', 10, on_end=True)}: " f"{format_dt(self.eta_on)}"
-                ),
+                uw.Text(f"{padding('ETA', 10, on_end=True)}: {format_dt(self.eta_on)}"),
                 self.std_option,
             )
         )
@@ -429,7 +429,7 @@ class ProvisionPane(Pane):
         self.menu.contents.append((uw.Divider(), self.std_option))
         content = f"\n{message}\n"
         if advice:
-            content += f"ℹ️  {advice}\n"
+            content += f"ℹ️  {advice}\n"  # noqa: RUF001
         if step and ProvisionManager.STEPS.index(
             type(step)
         ) >= ProvisionManager.STEPS.index(ResizePartitionStep):

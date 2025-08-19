@@ -22,7 +22,7 @@ class RpiImager:
     stdout: str
     ps: subprocess.Popen[str]
 
-    def __init__(self, args: list[str], **kwargs: dict[str, str]) -> None:
+    def __init__(self, args: list[str]) -> None:
         self.args = args
 
         self.started_on: datetime.datetime = datetime.datetime.now(tz=datetime.UTC)

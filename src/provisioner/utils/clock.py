@@ -21,6 +21,7 @@ for zone in zoneinfo.available_timezones():
     tz_map[tz.tzname(dst)] = tz
 
 timedatectl_bin = "timedatectl" if context.fake_pi else "/usr/bin/timedatectl"
+two_minutes = 120
 
 
 @define
@@ -121,7 +122,7 @@ class TimedatectlData:
     def sys_and_rtc_synced(self) -> bool:
         if not self.has_rtc:
             return True
-        return abs((self.rtc_utc_time - self.utc_time).total_seconds()) <= 120
+        return abs((self.rtc_utc_time - self.utc_time).total_seconds()) <= two_minutes
 
     @property
     def all_good(self) -> bool:

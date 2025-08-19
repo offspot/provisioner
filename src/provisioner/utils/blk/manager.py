@@ -165,6 +165,9 @@ class BlockDevicesManager:
             def __init__(self, obj: ImageFileInfo):
                 self.image = obj
 
+            def __hash__(self) -> int:
+                return hash(self.image)
+
             @staticmethod
             def get_kind_index(image: ImageFileInfo) -> int:
                 rule = ["hotspot", "raspi", "linux", "other"]
@@ -219,9 +222,7 @@ class BlockDevicesManager:
             try:
                 disk_value = 1 / disk.size
             except ZeroDivisionError:
-                import ipdb
-
-                ipdb.set_trace()
+                return len(rule) + 1, 0
             try:
                 return (rule.index(disk.transport), disk_value)
             except ValueError:

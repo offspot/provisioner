@@ -80,13 +80,13 @@ class WiFiNetwork:
 
     @property
     def signal_code(self) -> str:
-        if self.signal >= 90:
+        if self.signal >= 90:  # noqa: PLR2004
             return "excelent"
-        if self.signal >= 80:
+        if self.signal >= 80:  # noqa: PLR2004
             return "great"
-        if self.signal >= 70:
+        if self.signal >= 70:  # noqa: PLR2004
             return "correct"
-        if self.signal >= 50:
+        if self.signal >= 50:  # noqa: PLR2004
             return "poor"
         return "bad"
 

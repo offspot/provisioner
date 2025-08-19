@@ -42,7 +42,8 @@ class LoadingPane(Pane):
                     ConfirmingBoxButton(
                         "Restart",
                         on_press=self.on_restart_selected,
-                        question="Do you want to reboot now?\nRemove ProvisionOS media if you're done provisioning.",
+                        question="Do you want to reboot now?\n"
+                        "Remove ProvisionOS media if you're done provisioning.",
                     ),
                 ),
                 (
@@ -100,18 +101,17 @@ class LoadingPane(Pane):
         self.menu.focus_col = 0
         self.update()
 
-    def on_provision_selected(self, arg):
+    def on_provision_selected(self, *args):  # noqa: ARG002
         self.app.switch_to("provision")
 
-    def on_network_selected(self, arg):
+    def on_network_selected(self, *args):  # noqa: ARG002
         self.app.switch_to("network")
 
-    def on_restart_selected(self, arg):
+    def on_restart_selected(self, *args):  # noqa: ARG002
         self.app.stop(exit_code=RC_REBOOT)
 
-    def on_shutdown_selected(self, arg):
+    def on_shutdown_selected(self, *args):  # noqa: ARG002
         self.app.stop(exit_code=RC_HALT)
 
-    def on_advanced_selected(self, arg):
-        print(f"ADVANCED: {arg}")
+    def on_advanced_selected(self, *args):  # noqa: ARG002
         self.app.stop(exit_code=RC_ADVANCED)

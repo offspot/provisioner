@@ -7,6 +7,8 @@ from provisioner.provisioning.common import Step, StepResult
 from provisioner.utils.blk.misc import mount_to_temp, unmount
 from provisioner.utils.misc import run_step_command
 
+uncorrected_errors_rc = 4
+
 
 class ResizePartitionStep(Step):
 
@@ -111,7 +113,7 @@ class ResizePartitionStep(Step):
             text=True,
             verbose=verbose,
         )
-        if ps.returncode >= 4:
+        if ps.returncode >= uncorrected_errors_rc:
             return StepResult(
                 succeeded=False,
                 error_text="Failed to check partition after part resize",
@@ -139,7 +141,7 @@ class ResizePartitionStep(Step):
             text=True,
             verbose=verbose,
         )
-        if ps.returncode >= 4:
+        if ps.returncode >= uncorrected_errors_rc:
             return StepResult(
                 succeeded=False,
                 error_text="Failed to check partition after filesystem resize",

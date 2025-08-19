@@ -117,7 +117,7 @@ class NetworkPane(Pane):
             ),
         ]
         if internet.public_ip:
-            internet_text += [f" – IP: {internet.public_ip}"]
+            internet_text += [f" – IP: {internet.public_ip}"]  # noqa: RUF001
 
         eth0 = self.host.network.ifaces[ETH_IFACE]
         wlan0 = self.host.network.ifaces[WL_IFACE]
@@ -130,11 +130,13 @@ class NetworkPane(Pane):
             ]
         elif eth0:
             connected_text += [
-                f"✅ Connected via Ethernet (wired) – IP: {eth0.ip4_address}"
+                "✅ Connected via Ethernet (wired) –"  # noqa: RUF001
+                f" IP: {eth0.ip4_address}"
             ]
         elif wlan0:
             connected_text += [
-                f"✅ Connected via WiFi “{wlan0.name}” – IP: {eth0.ip4_address}"
+                "✅ Connected via WiFi “{wlan0.name}” –"  # noqa: RUF001
+                f" IP: {eth0.ip4_address}"
             ]
         else:
             connected_text += [
@@ -245,7 +247,7 @@ class NetworkPane(Pane):
         self.menu.focus_position = len(self.menu.contents) - 1
         self.update()
 
-    def on_ethernet_selected(self, *args):
+    def on_ethernet_selected(self, *args):  # noqa: ARG002
         self.remove_statuses()
         self.menu.contents.clear()
         spinner = SpinnerText("Configuring network for Ethernet…")
@@ -273,7 +275,7 @@ class NetworkPane(Pane):
 
         self.on_success("Ethernet now configured (DHCP)")
 
-    def on_wifi_selected(self, ident: str, *args):
+    def on_wifi_selected(self, ident: str, *args):  # noqa: ARG002
         self.remove_statuses()
         self.menu.contents.clear()
         self.network = self.networks[ident]
@@ -337,5 +339,5 @@ class NetworkPane(Pane):
         self.loading_text.done("")
         return self.on_success(f"WiFi now configured: {self.network.name}")
 
-    def on_cancel(self, *args):
+    def on_cancel(self, *args):  # noqa: ARG002
         self.app.switch_to("loading")
