@@ -136,6 +136,8 @@ def get_disks_from_devices(devices: list[Device]) -> dict[str, Disk]:
             disks[device.name] = Disk(**asdict(device))
             continue
         elif device.type == DeviceType.part:
+            if not device.parent:
+                raise OSError("Partition wihtout parent")
             if device.parent.name not in disks:
                 logger.warning(
                     f"Device {device.name}: parent ({device.parent}) not in list"

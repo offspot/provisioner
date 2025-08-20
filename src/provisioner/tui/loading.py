@@ -14,25 +14,22 @@ class LoadingPane(Pane):
         self.loading_text = SpinnerText("Gathering information…", align="center")
 
         # paint solid background with vertical stack
-        # self.uloop.widget.original_widget = uw.Filler(
         self.main_widget = uw.Filler(uw.Pile([], focus_item=1), valign="top")
-        pile = self.main_widget.base_widget  # .base_widget skips the decorations
+        pile = self.pile
 
         # paint logo with padding
-        pile.contents.append((uw.Divider(top=0, bottom=0), pile.options()))
+        self.append_to(pile, self.a_divider)
         for line in ASCII_LOGO.splitlines():
-            pile.contents.append(
-                (uw.Text(("logo", line), align="center"), pile.options())
-            )
-        pile.contents.append((uw.Divider(top=4), pile.options()))
+            self.append_to(pile, uw.Text(("logo", line), align="center"))
+        self.append_to(pile, uw.Divider(top=4))
 
         # paint a text line surrounded by two lines of decor
-        div = uw.Divider()
+        div = self.a_divider
         outside = uw.AttrMap(div, "outside")
         inside = uw.AttrMap(div, "inside")
         streak = uw.AttrMap(self.loading_text, "streak")
         for item in [outside, inside, streak, inside, outside]:
-            pile.contents.append((item, pile.options()))
+            self.append_to(pile, item)
 
         self.menu = uw.Columns(
             [
@@ -42,7 +39,8 @@ class LoadingPane(Pane):
                     ConfirmingBoxButton(
                         "Restart",
                         on_press=self.on_restart_selected,
-                        question="Do you want to reboot now?\nRemove ProvisionOS media if you're done provisioning.",
+                        question="Do you want to reboot now?\n"
+                        "Remove ProvisionOS media if you're done provisioning.",
                     ),
                 ),
                 (
@@ -57,7 +55,7 @@ class LoadingPane(Pane):
                 ("weight", 25, BoxButton("Advanced mode", self.on_advanced_selected)),
             ]
         )
-        pile.contents.append((self.menu, pile.options()))
+        self.append_to(pile, self.menu)
         pile.focus_item = self.menu
 
         # request spinner text to animate
@@ -100,18 +98,17 @@ class LoadingPane(Pane):
         self.menu.focus_col = 0
         self.update()
 
-    def on_provision_selected(self, arg):
+    def on_provision_selected(self, *args):  # noqa: ARG002
         self.app.switch_to("provision")
 
-    def on_network_selected(self, arg):
+    def on_network_selected(self, *args):  # noqa: ARG002
         self.app.switch_to("network")
 
-    def on_restart_selected(self, arg):
+    def on_restart_selected(self, *args):  # noqa: ARG002
         self.app.stop(exit_code=RC_REBOOT)
 
-    def on_shutdown_selected(self, arg):
+    def on_shutdown_selected(self, *args):  # noqa: ARG002
         self.app.stop(exit_code=RC_HALT)
 
-    def on_advanced_selected(self, arg):
-        print(f"ADVANCED: {arg}")
+    def on_advanced_selected(self, *args):  # noqa: ARG002
         self.app.stop(exit_code=RC_ADVANCED)

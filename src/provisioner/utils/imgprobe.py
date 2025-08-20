@@ -17,7 +17,7 @@ from provisioner.utils.loop import (
 )
 
 try:
-    import parted
+    import parted  # pyright: ignore reportMissingImports
 except ImportError:
     ...
 from attrs import define
@@ -149,7 +149,7 @@ class ImageFileInfo:
 
     @classmethod
     def load(cls, fpath: Path, device: str, relpath: Path) -> ImageFileInfo:
-        has_mbr = has_gpt = has_release = has_root = is_hotspot = False
+        has_mbr = has_gpt = has_root = False
         linux_info = SystemDetails.get_non_linux()
         try:
             pdevice = parted.getDevice(str(fpath))
@@ -336,7 +336,8 @@ def attach_image(fpath: Path, partition: int) -> AttachedImage:
     logger.debug(f"attaching {fpath} P{partition}")
     diskdev = Path(get_loopdev())
     logger.debug(f">using {diskdev}")
-    assert is_loopdev_free(str(diskdev))
+    if not is_loopdev_free(str(diskdev)):
+        raise OSError("loop device {diskdev!s} is not free")
     logger.debug(f">losetup {diskdev} {fpath}")
     attach_to_device(img_fpath=fpath, loop_dev=str(diskdev))
     partdev = Path(f"{diskdev}p{partition!s}")

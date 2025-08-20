@@ -3,7 +3,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from provisioner.constants import RC_ADVANCED, RC_HALT, RC_REBOOT, RC_UI
+from provisioner.constants import RC_ADVANCED, RC_HALT, RC_KILL, RC_REBOOT, RC_UI
 
 
 def main() -> int:
@@ -17,10 +17,10 @@ def main() -> int:
         try:
             ps = subprocess.run(command, check=False)
         except KeyboardInterrupt as exc:
-            print(exc)
-            return 128
+            print(exc)  # noqa: T201
+            return RC_KILL
         except Exception as exc:
-            print(exc)
+            print(exc)  # noqa: T201
             continue
         if ps.returncode == RC_ADVANCED:
             command = [str(bin_dir.joinpath("provisioner-advanced"))]
@@ -34,8 +34,8 @@ def main() -> int:
         if ps.returncode == RC_UI:
             command = [str(bin_dir.joinpath("provisioner-ui"))]
             continue
-        if ps.returncode >= 128:
-            print("Exit via signal, exiting (dev)")
+        if ps.returncode >= RC_KILL:
+            print("Exit via signal, exiting (dev)")  # noqa: T201
             return ps.returncode
     return 0
 

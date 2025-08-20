@@ -10,6 +10,7 @@ RC_ADVANCED: int = 40
 RC_REBOOT: int = 20
 RC_HALT: int = 30
 RC_UI: int = 50
+RC_KILL: int = 128
 
 REGULATORY_DOMAINS: dict[str, str] = {
     "US": "United States",

@@ -2,7 +2,6 @@ from collections.abc import Callable
 from typing import Any
 
 import click
-from halo import Halo
 from prettytable import PrettyTable, TableStyle
 
 from provisioner.cli.common import (
@@ -161,7 +160,7 @@ def main(host: ProvisionHost, *, show_paths: bool = False) -> CliResult:
     )
     table.add_divider()
     provision_disk_str = str(host.dev.provisionos_disk)
-    if show_paths:
+    if host.dev.provisionos_disk and show_paths:
         provision_disk_str += f" [{host.dev.provisionos_disk.path}]"
     table.add_row(["ProvisionOS Disk", provision_disk_str])
 

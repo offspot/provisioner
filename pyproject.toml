@@ -41,7 +41,7 @@ lint = [
   "ruff==0.12.0",
 ]
 check = [
-  "pyright==1.1.402",
+  "pyright==1.1.403",
 ]
 test = [
   "pytest==8.4.1",
@@ -94,7 +94,6 @@ html = "inv coverage --html --args '{args}'"
 [tool.hatch.envs.lint]
 python = "3.11"
 template = "lint"
-skip-install = false
 features = ["scripts", "lint"]
 
 [tool.hatch.envs.lint.scripts]
@@ -107,7 +106,7 @@ fixall = "inv fixall --args '{args}'"
 
 [tool.hatch.envs.check]
 python = "3.11"
-features = ["scripts", "check"]
+features = ["scripts", "check", "test"]
 
 [tool.hatch.envs.check.scripts]
 pyright = "inv check-pyright --args '{args}'"
@@ -213,6 +212,8 @@ ban-relative-imports = "all"
 [tool.ruff.lint.per-file-ignores]
 # Tests can use magic values, assertions, and relative imports
 "tests/**/*" = ["PLR2004", "S101", "TID252"]
+# LOGO in constants have non-break space, long lines and trailing spaces
+"constants.py" = ["RUF001", "E501", "W291"]
 
 [tool.pytest.ini_options]
 minversion = "7.3"

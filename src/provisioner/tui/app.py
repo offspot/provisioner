@@ -15,7 +15,7 @@ context = Context.get()
 logger = context.logger
 
 
-def _exception_handler(loop, context):
+def _exception_handler(loop, context):  # noqa: ARG001
     try:
         exception = context.get("exception")
         if not exception:
@@ -26,10 +26,11 @@ def _exception_handler(loop, context):
             + "\n"
             + "".join(traceback.format_tb(exception.__traceback__))
         )
-        # self.chatbox = LoadingChatBox(message)
-    except Exception:
+        # TODO: handle exception in UI
+        logger.exception(message)
+    except Exception as exc:
         ...
-        # self.chatbox = LoadingChatBox('Unable to show exception: ' + str(exc))
+        logger.exception("Unable to show exception: " + str(exc))
 
 
 class ExceptionHandlingLoop(uw.AsyncioEventLoop):
@@ -60,8 +61,6 @@ class App:
         ("btn_focus", "", "", "", "#000", "#fff"),
         ("confirm_btn", "", "", "", "#fff", "#000"),
         ("confirm_btn_focus", "", "", "", "#000", "#fff"),
-        # ("confirm_btn", "", "", "", "#fff", "#000"),
-        # ("confirm_btn_focus", "", "", "", "#cdf", "#1bf"),
         ("popup", "", "", "", "#fff", "#1bf"),
         ("popup_question", "", "", "", "#fff", "#1bf"),
         ("popup_cancel_btn", "", "", "", "#000", "#1bf"),
@@ -101,10 +100,13 @@ class App:
             handle_mouse=False,
             pop_ups=True,
         )
-        self.uloop.screen.set_terminal_properties(colors=2**24)
-        from provisioner.tui.pane import Pane
+        self.uloop.screen.set_terminal_properties(  # pyright: ignore reportAttributeAccessIssue
+            colors=2**24
+        )
 
-        self.pane: Pane = None
+        from provisioner.tui.pane import Pane  # noqa: PLC0415
+
+        self.pane: Pane | None = None
 
     def on_unhandled_input(self, key: str | tuple[str, int, int, int]) -> None:
         if key in {"q", "Q"}:
@@ -124,10 +126,10 @@ class App:
     def switch_to(self, pane: str):
         self.reset_ui()
         self.update()
-        from provisioner.tui.loading import LoadingPane
-        from provisioner.tui.network import NetworkPane
-        from provisioner.tui.pane import ExitPane
-        from provisioner.tui.provision import ProvisionPane
+        from provisioner.tui.loading import LoadingPane  # noqa: PLC0415
+        from provisioner.tui.network import NetworkPane  # noqa: PLC0415
+        from provisioner.tui.pane import ExitPane  # noqa: PLC0415
+        from provisioner.tui.provision import ProvisionPane  # noqa: PLC0415
 
         self.pane = {
             "loading": LoadingPane,
@@ -159,7 +161,7 @@ def main() -> int:
     app = App()
 
     def exit_gracefully(signum: int, frame: FrameType | None):  # noqa: ARG001
-        print("\n", flush=True)
+        print("\n", flush=True)  # noqa: T201
         app.stop(exit_code=128 + signum)
         logger.info(f"Received {signal.Signals(signum).name}/{signum}. Exiting")
         sys.exit(app.exit_code)

@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import click
+from attrs import asdict
 from halo import Halo
 
 from provisioner.cli.common import CliResult, refresh
@@ -35,14 +36,18 @@ def main(
     try:
         image_device = host.dev.get_disk_from_path(source_device_path)
     except KeyError:
-        image_device = None
+        click.secho(f"Source device ({source_device_path}) not found", fg="red")
+        return CliResult(code=3)
+
     img_dev_root = (
-        Disk(**image_device.parent).path if image_device.parent else image_device.path
+        Disk(**asdict(image_device.parent)).path
+        if image_device.parent
+        else image_device.path
     )
 
     if img_dev_root not in [d.path for d in host.dev.source_disks] and not assume_yes:
         if not click.confirm(
-            f"Source device ({image_device}) not identified as a source disk."
+            f"Source device ({image_device}) not identified as a source disk. Continue?"
         ):
             return CliResult(code=2)
     if not image_device:

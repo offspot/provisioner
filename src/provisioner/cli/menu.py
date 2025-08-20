@@ -22,7 +22,7 @@ context = Context.get()
 logger = Context.logger
 
 
-def noop(host: ProvisionHost) -> CliResult:
+def noop(host: ProvisionHost) -> CliResult:  # noqa: ARG001
     return CliResult(code=0)
 
 
@@ -115,18 +115,18 @@ def display(menu: Menu) -> Pane:
     return choice
 
 
-def main(host: ProvisionHost = None) -> int:
+def main(host: ProvisionHost | None = None) -> int:
     # start with status
     pane: Pane = PANES["status"]
     menu = PANES
-    # payload: dict[str, Any]
-    if host is None:
+
+    if not isinstance(host, ProvisionHost):
         host = ProvisionHost()
 
     while True:
         try:
             # greet_for(pane.title)
-            res: CliResult = pane.entrypoint(host=host)
+            res: CliResult = pane.entrypoint(host)
         except Exception as exc:
             click.secho(
                 f"{pane.name} crashed. That's unexpected. "

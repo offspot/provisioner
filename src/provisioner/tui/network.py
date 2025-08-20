@@ -51,32 +51,31 @@ class NetworkPane(Pane):
     def render(self):
         # paint solid background with vertical stack
         self.main_widget = uw.Filler(uw.Pile([], focus_item=1), valign="top")
-        pile = self.main_widget.base_widget  # .base_widget skips the decorations
+        pile = self.pile
 
         # paint a text line surrounded by two lines of decor
-        div = uw.Divider()
+        div = self.a_divider
         outside = uw.AttrMap(div, "outside")
         inside = uw.AttrMap(div, "inside")
         streak = uw.AttrMap(
             uw.Text("Configure networking", align=uw.Align.CENTER), "streak"
         )
-        for item in [outside, inside, streak, inside, outside, uw.Divider()]:
-            pile.contents.append((item, pile.options()))
+        for item in [outside, inside, streak, inside, outside, self.a_divider]:
+            self.append_to(pile, item)
 
         self.update()
         # re-query network to get an accurate, up-to-date status
         self.host.query_network()
 
-        self.statuses_entry = (
+        self.statuses_entry = self.append_to(
+            pile,
             uw.Padding(
                 self.get_statuses(),
                 align=uw.Align.CENTER,
                 width=(uw.WHSettings.RELATIVE, 50),
                 min_width=50,
             ),
-            self.std_option,
         )
-        pile.contents.append(self.statuses_entry)
 
         self.loading_text = SpinnerText(
             "Looking for wireless networks…", align="center"
@@ -96,7 +95,7 @@ class NetworkPane(Pane):
             width=(uw.WHSettings.RELATIVE, 50),
             min_width=50,
         )
-        pile.contents.append((decorated_menu, self.std_option))
+        self.append_to(pile, decorated_menu)
         pile.focus_item = decorated_menu
 
         # request spinner text to animate
@@ -117,7 +116,7 @@ class NetworkPane(Pane):
             ),
         ]
         if internet.public_ip:
-            internet_text += [f" – IP: {internet.public_ip}"]
+            internet_text += [f" – IP: {internet.public_ip}"]  # noqa: RUF001
 
         eth0 = self.host.network.ifaces[ETH_IFACE]
         wlan0 = self.host.network.ifaces[WL_IFACE]
@@ -130,11 +129,13 @@ class NetworkPane(Pane):
             ]
         elif eth0:
             connected_text += [
-                f"✅ Connected via Ethernet (wired) – IP: {eth0.ip4_address}"
+                "✅ Connected via Ethernet (wired) –"  # noqa: RUF001
+                f" IP: {eth0.ip4_address}"
             ]
         elif wlan0:
             connected_text += [
-                f"✅ Connected via WiFi “{wlan0.name}” – IP: {eth0.ip4_address}"
+                "✅ Connected via WiFi “{wlan0.name}” –"  # noqa: RUF001
+                f" IP: {eth0.ip4_address}"
             ]
         else:
             connected_text += [
@@ -151,8 +152,7 @@ class NetworkPane(Pane):
         return pile
 
     def remove_statuses(self):
-        pile = self.main_widget.base_widget
-        pile.contents.remove(self.statuses_entry)
+        self.remove_from(self.pile, self.statuses_entry)
 
     def add_to_menu(self, entry):
         self.menu.contents.append(entry)
@@ -245,7 +245,7 @@ class NetworkPane(Pane):
         self.menu.focus_position = len(self.menu.contents) - 1
         self.update()
 
-    def on_ethernet_selected(self, *args):
+    def on_ethernet_selected(self, *args):  # noqa: ARG002
         self.remove_statuses()
         self.menu.contents.clear()
         spinner = SpinnerText("Configuring network for Ethernet…")
@@ -273,7 +273,7 @@ class NetworkPane(Pane):
 
         self.on_success("Ethernet now configured (DHCP)")
 
-    def on_wifi_selected(self, ident: str, *args):
+    def on_wifi_selected(self, ident: str, *args):  # noqa: ARG002
         self.remove_statuses()
         self.menu.contents.clear()
         self.network = self.networks[ident]
@@ -337,5 +337,5 @@ class NetworkPane(Pane):
         self.loading_text.done("")
         return self.on_success(f"WiFi now configured: {self.network.name}")
 
-    def on_cancel(self, *args):
+    def on_cancel(self, *args):  # noqa: ARG002
         self.app.switch_to("loading")

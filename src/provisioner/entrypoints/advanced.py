@@ -53,11 +53,11 @@ def main() -> int:
         context = Context.get()
         debug = context.debug
 
-        from provisioner.cli.menu import main as main_prog
-        from provisioner.host import ProvisionHost
+        from provisioner.cli.menu import main as main_prog  # noqa: PLC0415
+        from provisioner.host import ProvisionHost  # noqa: PLC0415
 
         def exit_gracefully(signum: int, frame: FrameType | None):  # noqa: ARG001
-            print("\n", flush=True)
+            print("\n", flush=True)  # noqa: T201
             logger.info(f"Received {signal.Signals(signum).name}/{signum}. Exiting")
             sys.exit(4)
 

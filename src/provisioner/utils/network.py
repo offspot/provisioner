@@ -80,13 +80,13 @@ class WiFiNetwork:
 
     @property
     def signal_code(self) -> str:
-        if self.signal >= 90:
+        if self.signal >= 90:  # noqa: PLR2004
             return "excelent"
-        if self.signal >= 80:
+        if self.signal >= 80:  # noqa: PLR2004
             return "great"
-        if self.signal >= 70:
+        if self.signal >= 70:  # noqa: PLR2004
             return "correct"
-        if self.signal >= 50:
+        if self.signal >= 50:  # noqa: PLR2004
             return "poor"
         return "bad"
 
@@ -329,13 +329,13 @@ def get_interfaces() -> dict[str, Interface]:
 
         ifaces.append(
             Interface(
-                name=ifr["GENERAL.DEVICE"],
-                type=ifr["GENERAL.TYPE"],
-                hwaddr=ifr["GENERAL.HWADDR"],
-                state=ifr["GENERAL.STATE"],
-                connection=ifr["GENERAL.CONNECTION"],
+                name=str(ifr["GENERAL.DEVICE"]),
+                type=str(ifr["GENERAL.TYPE"]),
+                hwaddr=str(ifr["GENERAL.HWADDR"]),
+                state=str(ifr["GENERAL.STATE"]),
+                connection=str(ifr["GENERAL.CONNECTION"]),
                 ip4_address=(
-                    IPv4Address(ifr["IP4.ADDRESS[1]"].split("/")[0])
+                    IPv4Address(str(ifr["IP4.ADDRESS[1]"]).split("/")[0])
                     if ifr.get("IP4.ADDRESS[1]")
                     else None
                 ),
@@ -343,7 +343,7 @@ def get_interfaces() -> dict[str, Interface]:
                     IPv4Address(ifr["IP4.GATEWAY"]) if ifr.get("IP4.GATEWAY") else None
                 ),
                 ip4_dns=(
-                    IPv4Address(ifr["IP4.DNS[1]"].split()[0])
+                    IPv4Address(str(ifr["IP4.DNS[1]"]).split()[0])
                     if ifr.get("IP4.DNS[1]")
                     else None
                 ),
