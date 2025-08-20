@@ -106,7 +106,7 @@ fixall = "inv fixall --args '{args}'"
 
 [tool.hatch.envs.check]
 python = "3.11"
-features = ["scripts", "check"]
+features = ["scripts", "check", "test"]
 
 [tool.hatch.envs.check.scripts]
 pyright = "inv check-pyright --args '{args}'"
