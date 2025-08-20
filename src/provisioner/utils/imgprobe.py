@@ -17,7 +17,7 @@ from provisioner.utils.loop import (
 )
 
 try:
-    import parted
+    import parted  # pyright: ignore reportMissingImports
 except ImportError:
     ...
 from attrs import define

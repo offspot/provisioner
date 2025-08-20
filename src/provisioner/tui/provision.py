@@ -31,10 +31,6 @@ one_minute = 60
 
 class ProvisionPane(Pane):
 
-    @property
-    def std_option(self):
-        return (uw.WHSettings.WEIGHT, 10)
-
     def render(self):
         self.loading_text = SpinnerText("Gathering information…", align="center")
         self.uloop.widget = uw.AttrMap(uw.SolidFill(), "bg_prov")
@@ -82,7 +78,7 @@ class ProvisionPane(Pane):
     def gather_infos(self):
         self.host.query_all()
         self.loading_text.done("")
-        pile: uw.Pile = self.main_widget.base_widget
+        pile = self.pile
         pile.contents.clear()
         self.update()
         self.render_with_host()
@@ -143,30 +139,26 @@ class ProvisionPane(Pane):
         title_text = "Select source Image"
         if filtered_images:
             title_text += f" ({len(filtered_images)} excluded as too large for disk)"
-        self.menu.contents.append(
-            (
-                uw.AttrMap(
-                    uw.Text(title_text, align=uw.Align.CENTER),
-                    "highlight_prov",
-                ),
-                self.std_option,
-            )
+        self.append_to(
+            self.menu,
+            uw.AttrMap(
+                uw.Text(title_text, align=uw.Align.CENTER),
+                "highlight_prov",
+            ),
         )
-        self.menu.contents.append((uw.Divider(), self.std_option))
+        self.append_to(self.menu, self.a_divider)
 
         for image in self.host.dev.images:
             if image in filtered_images:
                 continue
 
-            self.menu.contents.append(
-                (
-                    uw.Button(
-                        f"{padding(format_size(image.size), 10)} "
-                        f"{image.name} ({image.fpath.name})",
-                        on_press=functools.partial(self.on_image_selected, image),
-                    ),
-                    self.std_option,
-                )
+            self.append_to(
+                self.menu,
+                uw.Button(
+                    f"{padding(format_size(image.size), 10)} "
+                    f"{image.name} ({image.fpath.name})",
+                    on_press=functools.partial(self.on_image_selected, image),
+                ),
             )
         if hasattr(self, "image"):
             self.menu.focus_position = self.host.dev.images.index(self.image) + 1
@@ -179,7 +171,7 @@ class ProvisionPane(Pane):
             width=(uw.WHSettings.RELATIVE, 50),
             min_width=50,
         )
-        pile.contents.append((decorated_menu, self.std_option))
+        self.append_to(pile, decorated_menu)
         self.menu_in_pile = True
         pile.focus_position = len(pile.contents) - 1
 
@@ -189,91 +181,75 @@ class ProvisionPane(Pane):
         self.image = image
         self.menu.contents.clear()
         self.header_text = uw.Text("Confirm provisioning", align=uw.Align.CENTER)
-        self.menu.contents.append(
-            (
-                uw.AttrMap(
-                    self.header_text,
-                    "highlight_prov",
-                ),
-                self.std_option,
-            )
+        self.append_to(
+            self.menu,
+            uw.AttrMap(
+                self.header_text,
+                "highlight_prov",
+            ),
         )
-        self.menu.contents.append((uw.Divider(), self.std_option))
-        self.menu.contents.append(
-            (
-                uw.Text(
-                    f"{padding('Device', 10, on_end=True)}: {self.host.model}"
-                    f" – S/N: {self.host.serial_number.upper()}",  # noqa: RUF001
-                    align=uw.Align.LEFT,
-                ),
-                self.std_option,
-            )
+        self.append_to(self.menu, self.a_divider)
+        self.append_to(
+            self.menu,
+            uw.Text(
+                f"{padding('Device', 10, on_end=True)}: {self.host.model}"
+                f" – S/N: {self.host.serial_number.upper()}",  # noqa: RUF001
+                align=uw.Align.LEFT,
+            ),
         )
-        self.menu.contents.append(
-            (
-                uw.Text(
-                    f"{padding('Image', 10, on_end=True)}: "
-                    f"{format_size(self.image.size)} {self.image.name}",
-                    align=uw.Align.LEFT,
-                ),
-                self.std_option,
-            )
+        self.append_to(
+            self.menu,
+            uw.Text(
+                f"{padding('Image', 10, on_end=True)}: "
+                f"{format_size(self.image.size)} {self.image.name}",
+                align=uw.Align.LEFT,
+            ),
         )
-        self.menu.contents.append(
-            (
-                uw.Text(
-                    f"{padding('Disk', 10, on_end=True)}: {self.target_disk!s}",
-                    align=uw.Align.LEFT,
-                ),
-                self.std_option,
-            )
+        self.append_to(
+            self.menu,
+            uw.Text(
+                f"{padding('Disk', 10, on_end=True)}: {self.target_disk!s}",
+                align=uw.Align.LEFT,
+            ),
         )
-        self.menu.contents.append(
-            (
-                uw.Text(
-                    f"{padding('Profile', 10, on_end=True)}: Kiwix Hotspot H1",
-                    align=uw.Align.LEFT,
-                ),
-                self.std_option,
-            )
+        self.append_to(
+            self.menu,
+            uw.Text(
+                f"{padding('Profile', 10, on_end=True)}: Kiwix Hotspot H1",
+                align=uw.Align.LEFT,
+            ),
         )
         self.exptected_duration = get_estimated_duration(self.image.size)
-        self.menu.contents.append(
-            (
+        self.append_to(
+            self.menu,
+            uw.Text(
+                f"{padding('Duration', 10, on_end=True)}: "
+                f"{format_duration(self.exptected_duration)} "
+                "(est.)",
+                align=uw.Align.LEFT,
+            ),
+        )
+        self.append_to(self.menu, self.a_divider)
+        self.append_to(
+            self.menu,
+            uw.AttrMap(
                 uw.Text(
-                    f"{padding('Duration', 10, on_end=True)}: "
-                    f"{format_duration(self.exptected_duration)} "
-                    "(est.)",
-                    align=uw.Align.LEFT,
+                    "Ready to start ?",
+                    align=uw.Align.CENTER,
                 ),
-                self.std_option,
-            )
+                "highlight_prov",
+            ),
         )
-        self.menu.contents.append((uw.Divider(), self.std_option))
-        self.menu.contents.append(
-            (
-                uw.AttrMap(
-                    uw.Text(
-                        "Ready to start ?",
-                        align=uw.Align.CENTER,
-                    ),
-                    "highlight_prov",
-                ),
-                self.std_option,
-            )
-        )
-        self.menu.contents.append((uw.Divider(), self.std_option))
-        self.menu.contents.append(
-            (
-                uw.Columns(
-                    [
-                        BoxButton("Cancel", on_press=self.on_cancel),
-                        uw.Divider(),
-                        BoxButton("Let's Go!", on_press=self.on_confirm),
-                    ]
-                ),
-                self.std_option,
-            )
+        self.append_to(self.menu, self.a_divider)
+        self.append_to(
+            self.menu,
+            uw.Columns(
+                [
+                    BoxButton("Cancel", on_press=self.on_cancel),
+                    uw.Divider(),
+                    BoxButton("Let's Go!", on_press=self.on_confirm),
+                ]
+            ),
         )
         self.menu.focus_position = len(self.menu.contents) - 1
         self.update()
@@ -294,32 +270,24 @@ class ProvisionPane(Pane):
             seconds=self.exptected_duration
         )
 
-        self.menu.contents.append(
-            (
-                uw.Text(
-                    f"{padding('Started on', 10, on_end=True)}: "
-                    f"{format_dt(self.started_on)}"
-                ),
-                self.std_option,
-            )
+        self.append_to(
+            self.menu,
+            uw.Text(
+                f"{padding('Started on', 10, on_end=True)}: "
+                f"{format_dt(self.started_on)}"
+            ),
         )
-        self.menu.contents.append(
-            (
-                uw.Text(f"{padding('ETA', 10, on_end=True)}: {format_dt(self.eta_on)}"),
-                self.std_option,
-            )
+        self.append_to(
+            self.menu,
+            uw.Text(f"{padding('ETA', 10, on_end=True)}: {format_dt(self.eta_on)}"),
         )
+
         self.ended_on_text = uw.Text("")
-        self.menu.contents.append(
-            (
-                self.ended_on_text,
-                self.std_option,
-            )
-        )
-        self.menu.contents.append((uw.Divider(), self.std_option))
+        self.append_to(self.menu, self.ended_on_text)
+        self.append_to(self.menu, self.a_divider)
 
         self.spinner = SpinnerText("Preparing…", style="prov spinner")
-        self.menu.contents.append((self.spinner, self.std_option))
+        self.append_to(self.menu, self.spinner)
 
         self.progressbar = uw.ProgressBar(
             "pg normal", "pg complete", 0, 100, "pg smooth"
@@ -372,7 +340,7 @@ class ProvisionPane(Pane):
                     step.running = True
                     if step.reports_progress:
                         self.progressbar.set_completion(0)
-                        self.menu.contents.append((self.progressbar, self.std_option))
+                        self.append_to(self.menu, self.progressbar)
                         Thread(
                             target=update_pg,
                             kwargs={"pg": self.progressbar, "step": step},
@@ -426,7 +394,7 @@ class ProvisionPane(Pane):
     def on_error(
         self, message: str = "Error", advice: str = "", step: Step | None = None
     ):
-        self.menu.contents.append((uw.Divider(), self.std_option))
+        self.append_to(self.menu, self.a_divider)
         content = f"\n{message}\n"
         if advice:
             content += f"ℹ️  {advice}\n"  # noqa: RUF001
@@ -434,24 +402,20 @@ class ProvisionPane(Pane):
             type(step)
         ) >= ProvisionManager.STEPS.index(ResizePartitionStep):
             content += "You are adviced to reboot before trying again.\n"
-        self.menu.contents.append(
-            (
-                uw.AttrMap(uw.Text(content, align=uw.Align.CENTER), "prov error"),
-                self.std_option,
-            )
+        self.append_to(
+            self.menu, uw.AttrMap(uw.Text(content, align=uw.Align.CENTER), "prov error")
         )
-        self.menu.contents.append((uw.Divider(), self.std_option))
-        self.menu.contents.append(
-            (
-                uw.Columns(
-                    [
-                        BoxButton(label="Cancel", on_press=self.go_home),
-                        uw.Divider(),
-                        BoxButton(label="Reboot", on_press=self.reboot),
-                    ]
-                ),
-                self.std_option,
-            )
+
+        self.append_to(self.menu, self.a_divider)
+        self.append_to(
+            self.menu,
+            uw.Columns(
+                [
+                    BoxButton(label="Cancel", on_press=self.go_home),
+                    uw.Divider(),
+                    BoxButton(label="Reboot", on_press=self.reboot),
+                ]
+            ),
         )
         self.update()
         self.menu.focus_position = len(self.menu.contents) - 1
@@ -463,33 +427,30 @@ class ProvisionPane(Pane):
         # remove the spinner
         self.menu.contents.pop()
 
-        self.menu.contents.append((uw.Divider(), self.std_option))
+        self.append_to(self.menu, self.a_divider)
         content = f"\n{message}\n"
         content += (
             "Please remove Provision-OS disk "
             f"({self.host.dev.provisionos_disk}) and reboot.\n"
         )
-        self.menu.contents.append(
-            (
-                uw.AttrMap(
-                    uw.Text(content, align=uw.Align.CENTER),
-                    "prov success",
-                ),
-                self.std_option,
-            )
+        self.append_to(
+            self.menu,
+            uw.AttrMap(
+                uw.Text(content, align=uw.Align.CENTER),
+                "prov success",
+            ),
         )
-        self.menu.contents.append((uw.Divider(), self.std_option))
-        self.menu.contents.append(
-            (
-                uw.Columns(
-                    [
-                        uw.Divider(),
-                        BoxButton(label="Reboot", on_press=self.reboot),
-                        uw.Divider(),
-                    ]
-                ),
-                self.std_option,
-            )
+
+        self.append_to(self.menu, self.a_divider)
+        self.append_to(
+            self.menu,
+            uw.Columns(
+                [
+                    uw.Divider(),
+                    BoxButton(label="Reboot", on_press=self.reboot),
+                    uw.Divider(),
+                ]
+            ),
         )
         self.update()
         self.menu.focus_position = len(self.menu.contents) - 1
@@ -500,15 +461,13 @@ class ProvisionPane(Pane):
         if not self.imager_stats or not self.imager_stats.write_duration:
             return
 
-        self.menu.contents.append((uw.Divider(), self.std_option))
-        self.menu.contents.append(
-            (
-                uw.AttrMap(
-                    uw.Text(f"Imaging stats (flashing {format_size(self.image.size)})"),
-                    "highlight_prov",
-                ),
-                self.std_option,
-            )
+        self.append_to(self.menu, self.a_divider)
+        self.append_to(
+            self.menu,
+            uw.AttrMap(
+                uw.Text(f"Imaging stats (flashing {format_size(self.image.size)})"),
+                "highlight_prov",
+            ),
         )
 
         writing_line = f"{format_duration(self.imager_stats.write_duration)}"
@@ -539,13 +498,9 @@ class ProvisionPane(Pane):
 
         name_len = max(len(name) for name in lines.keys())
         for name, value in lines.items():
-            self.menu.contents.append(
-                (
-                    uw.Text(
-                        f"{padding(text=name, size=name_len, on_end=True)}: {value}"
-                    ),
-                    self.std_option,
-                )
+            self.append_to(
+                self.menu,
+                uw.Text(f"{padding(text=name, size=name_len, on_end=True)}: {value}"),
             )
 
     def audio_feedback(self, fnames: list[str]):

@@ -42,8 +42,11 @@ class SpinnerText(uw.Text):
             def update(*args):  # noqa: ARG001
                 if self.is_loading:
                     self.next_frame()
-                    self.loop.set_alarm_in(self._interval, update)
+                    if self.loop:
+                        self.loop.set_alarm_in(self._interval, update)
 
             update()
 
-        self.loop.event_loop._loop.create_task(animator())
+        self.loop.event_loop._loop.create_task(  # type: ignore reportAttributeAccessIssue
+            animator()
+        )

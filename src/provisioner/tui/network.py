@@ -51,32 +51,31 @@ class NetworkPane(Pane):
     def render(self):
         # paint solid background with vertical stack
         self.main_widget = uw.Filler(uw.Pile([], focus_item=1), valign="top")
-        pile = self.main_widget.base_widget  # .base_widget skips the decorations
+        pile = self.pile
 
         # paint a text line surrounded by two lines of decor
-        div = uw.Divider()
+        div = self.a_divider
         outside = uw.AttrMap(div, "outside")
         inside = uw.AttrMap(div, "inside")
         streak = uw.AttrMap(
             uw.Text("Configure networking", align=uw.Align.CENTER), "streak"
         )
-        for item in [outside, inside, streak, inside, outside, uw.Divider()]:
-            pile.contents.append((item, pile.options()))
+        for item in [outside, inside, streak, inside, outside, self.a_divider]:
+            self.append_to(pile, item)
 
         self.update()
         # re-query network to get an accurate, up-to-date status
         self.host.query_network()
 
-        self.statuses_entry = (
+        self.statuses_entry = self.append_to(
+            pile,
             uw.Padding(
                 self.get_statuses(),
                 align=uw.Align.CENTER,
                 width=(uw.WHSettings.RELATIVE, 50),
                 min_width=50,
             ),
-            self.std_option,
         )
-        pile.contents.append(self.statuses_entry)
 
         self.loading_text = SpinnerText(
             "Looking for wireless networks…", align="center"
@@ -96,7 +95,7 @@ class NetworkPane(Pane):
             width=(uw.WHSettings.RELATIVE, 50),
             min_width=50,
         )
-        pile.contents.append((decorated_menu, self.std_option))
+        self.append_to(pile, decorated_menu)
         pile.focus_item = decorated_menu
 
         # request spinner text to animate
@@ -153,8 +152,7 @@ class NetworkPane(Pane):
         return pile
 
     def remove_statuses(self):
-        pile = self.main_widget.base_widget
-        pile.contents.remove(self.statuses_entry)
+        self.remove_from(self.pile, self.statuses_entry)
 
     def add_to_menu(self, entry):
         self.menu.contents.append(entry)

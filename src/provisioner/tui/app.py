@@ -100,10 +100,13 @@ class App:
             handle_mouse=False,
             pop_ups=True,
         )
-        self.uloop.screen.set_terminal_properties(colors=2**24)
+        self.uloop.screen.set_terminal_properties(  # pyright: ignore reportAttributeAccessIssue
+            colors=2**24
+        )
+
         from provisioner.tui.pane import Pane  # noqa: PLC0415
 
-        self.pane: Pane = None
+        self.pane: Pane | None = None
 
     def on_unhandled_input(self, key: str | tuple[str, int, int, int]) -> None:
         if key in {"q", "Q"}:

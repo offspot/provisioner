@@ -118,7 +118,7 @@ class ConfirmingBoxButton(uw.PopUpLauncher):
         return {"left": 0, "top": 1, "overlay_width": 40, "overlay_height": 10}
 
 
-class InfoPopupDialog(uw.WidgetWrap):
+class InfoPopupDialog(ConfirmPopupDialog):
 
     signals: typing.ClassVar[list[str]] = ["close"]
 

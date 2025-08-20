@@ -51,7 +51,7 @@ def main(host: ProvisionHost) -> CliResult:
         return CliResult(code=RC_CANCELED)
     image = host.dev.images[image_index]
     image_device = host.dev.get_disk_from_name(image.device)
-    image_phy_disk = image_device.disk or image_device
+    image_phy_disk = getattr(image_device, "disk", image_device)
 
     click.echo("Image: ", nl=False)
     click.secho(image.linux.release, fg="magenta", nl=False)
