@@ -94,7 +94,6 @@ html = "inv coverage --html --args '{args}'"
 [tool.hatch.envs.lint]
 python = "3.11"
 template = "lint"
-skip-install = false
 features = ["scripts", "lint"]
 
 [tool.hatch.envs.lint.scripts]

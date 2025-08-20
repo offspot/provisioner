@@ -17,6 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install libparted (to build pyparted dependency)
+        run: sudo apt-get install -y libparted-dev
+
       - name: Set up Python ${{ matrix.python }}
         uses: actions/setup-python@v5
         with:
