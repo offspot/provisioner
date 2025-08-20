@@ -37,6 +37,19 @@ umount_bin = shutil.which("umount")
 
 
 class DockerStep(Step):
+    """Docker images load step to import tar-images into balena engine
+
+    This requires mounting both the target system partition
+    and the target data partition on which the tar images are stored
+
+    It also requires running the balena engine serice inside the chroot
+    with cgroupsv1 properly setup
+
+    Then the docker-images-loader.py script can be run in the chroot
+    and eventually all this needs to be cleaned-up
+
+    All chroot-operations are run inside an adhoc bash script
+    """
 
     ident: str = "docker"
     name: str = "Load OCI images onto Docker"

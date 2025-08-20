@@ -19,14 +19,17 @@ logger = context.logger
 
 
 def format_size(size: int, *, binary: bool = False) -> str:
+    """formatted size (decimal by default)"""
     return humanfriendly.format_size(size, binary=binary)
 
 
 def format_duration(seconds: int | float) -> str:
+    """formatted duration"""
     return humanfriendly.format_timespan(num_seconds=seconds, detailed=False)
 
 
 def format_speed(size: int, duration: int | float) -> str:
+    """5MB/s like formatting of speed from size (bytes) and duration (seconds)"""
     return f"{format_size(size // int(duration))}/s"
 
 
@@ -38,6 +41,7 @@ def yesno(value: Any) -> str:
 def format_dt(
     dt: datetime.datetime, fmt: str = "long", locale: str | None = None
 ) -> str:
+    """formatted datetime"""
     return format_datetime(dt, fmt, locale=locale or "en_US.UTF-8")
 
 
@@ -53,6 +57,7 @@ def run_command(args: list[str]) -> CompletedProcess[str]:
 
 
 def padding(text: str, size: int, *, on_end: bool = False) -> str:
+    """fixed-size leading (default) or trailing padding to align texts"""
     tl = len(text)
     if tl > size:
         return text[:size]
@@ -63,6 +68,7 @@ def padding(text: str, size: int, *, on_end: bool = False) -> str:
 
 
 def find_file(under: Path, named: str) -> Path:
+    """Path from a directory and fname where fname can be anywhere in subtree"""
     try:
         return next(under.rglob(named))
     except IndexError:
@@ -84,6 +90,7 @@ def get_environ() -> dict[str, str]:
 
 
 def get_now() -> datetime.datetime:
+    """current UTC datetime"""
     return datetime.datetime.now(tz=datetime.UTC)
 
 
@@ -112,6 +119,7 @@ def run_step_command(
 
 
 def get_estimated_duration(size: int) -> int:
+    """est. provisioning duration based on size (bytes)"""
     one_minute = 60
 
     def round_to_mn(seconds: int | float) -> int:

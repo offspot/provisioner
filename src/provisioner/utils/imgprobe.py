@@ -29,6 +29,7 @@ logger = context.logger
 
 
 def get_supported_filesystems(fpath: Path) -> list[str]:
+    """list of filesystems that the kernel supports"""
     filesystems: set[str] = set()
     for line in fpath.read_text().splitlines():
         filesystems.add(line.rsplit(maxsplit=1)[-1])
@@ -47,6 +48,8 @@ SUPPORTED_ROOT_FS = [
 
 
 class SystemDetails(NamedTuple):
+    """Details about an inspected image system"""
+
     is_linux: bool
     release: str | None
     version: str | None

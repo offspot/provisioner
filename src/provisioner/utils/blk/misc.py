@@ -43,6 +43,7 @@ def unmount(mountpoint: Path) -> CompletedProcess[str]:
 
 
 def timed_unmount(mountpoint: Path, delay: int | float = 2) -> CompletedProcess[str]:
+    """unmount after a customizable delay"""
     logger.debug(f"sleeping {delay}s before unmounting {mountpoint}")
     time.sleep(delay)
     return unmount(mountpoint=mountpoint)

@@ -2,6 +2,7 @@ from typing import Literal, TypeAlias
 
 import urwid as uw
 
+from provisioner.host import ProvisionHost
 from provisioner.tui.app import App
 
 PileOptions: TypeAlias = (
@@ -23,15 +24,17 @@ class Pane:
         )
 
     @property
-    def host(self):
+    def host(self) -> ProvisionHost:
         return self.app.host
 
     @property
-    def uloop(self):
+    def uloop(self) -> uw.MainLoop:
+        """the urwid loop of the app"""
         return self.app.uloop
 
     @property
     def pile(self) -> uw.Pile:
+        """the base_widget of the pane casted as Pile (might be wrong)"""
         pile: uw.Pile = (
             self.main_widget.base_widget  # .base_widget skips the decorations
         )  # pyright: ignore reportAssignmentType
@@ -39,12 +42,14 @@ class Pane:
 
     @property
     def a_divider(self) -> uw.Divider:
+        """a blank Divider instance"""
         return uw.Divider(top=0, bottom=0)
 
     @property
     def std_option(
         self,
     ) -> PileOptions:
+        """our default options for in-list items"""
         return (uw.WHSettings.WEIGHT, 10)
 
     def append_to(
@@ -53,6 +58,7 @@ class Pane:
         widget: uw.Widget,
         options: PileOptions | None = None,
     ) -> WidgetListEntry:
+        """append a widget to a list widget (shortcut due to typing issue)"""
         if options is None:
             options = self.std_option
         entry = (widget, options)
@@ -60,6 +66,7 @@ class Pane:
         return entry
 
     def remove_from(self, list_w: uw.Widget, entry: WidgetListEntry | uw.Widget):
+        """remove a widget from a list widget (shortcut due to typing issue)"""
         list_w.contents.remove(entry)  # pyright: ignore reportAttributeAccessIssue
 
     def stop(self): ...

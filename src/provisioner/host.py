@@ -60,6 +60,7 @@ class ProvisionHost:
 
     @property
     def provision_ready(self) -> tuple[bool, str]:
+        """whether conditions are met for no-question provisioning"""
         if not self.dev.nvme_target_disks:
             return False, "No target disk present"
         elif len(self.dev.nvme_target_disks) > 1:

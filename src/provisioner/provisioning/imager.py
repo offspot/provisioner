@@ -19,6 +19,8 @@ logger = context.logger
 
 
 class RpiImager:
+    """Subprocess wrapper that reads rpi-imager output to compute stats"""
+
     stdout: str
     ps: subprocess.Popen[str]
 

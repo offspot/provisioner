@@ -119,5 +119,6 @@ ASCII_LOGO = r"""
 
 USB_BUS_SPEED_PER_SECOND = "375MiB"
 
+# in-order list of sound files to play upon provision completion
 SUCCESS_SOUNDS = ["notification.wav", "provision_succeeded.wav"]
 FAILURE_SOUNDS = ["error.wav", "provision_failed.wav"]

@@ -82,6 +82,7 @@ def get_bootorder() -> BootOrder:
 
 
 def update_eeprom(*, verbose: bool = False):
+    """update device's EEPROM to apply our BOOT_ORDER and other options"""
     new_bootorder = BootOrder.using([getattr(BootValue, item) for item in BOOT_ORDER])
     ps = run_step_command(
         [shutil.which("rpi-eeprom-config")], capture_output=True, text=True, check=True

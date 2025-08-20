@@ -138,27 +138,6 @@ class TimedatectlData:
             return "Not enabled"
         return "Not synced"
 
-    @property
-    def warnings(self) -> list[str]:
-        warnings: list[str] = []
-        out_of_sync = datetime.datetime(2025, 1, 1, tzinfo=datetime.UTC)
-
-        if not self.ntp_enabled:
-            warnings.append(
-                "NTP Syncing is disabled. That's unexpected. "
-                "System clock will not auto sync when online."
-            )
-        if not self.ntp_synced:
-            warnings.append(
-                "System time is not synced via NTP. It's normal when offline."
-            )
-        if self.utc_time <= out_of_sync:
-            warnings.append("System time is in the past.")
-        if self.has_rtc and self.rtc_time <= out_of_sync:
-            warnings.append("RTC time is in the past.")
-
-        return warnings
-
 
 class ClockManager:
 

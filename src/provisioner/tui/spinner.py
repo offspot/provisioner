@@ -2,6 +2,15 @@ import urwid as uw
 
 
 class SpinnerText(uw.Text):
+    """A text pefixed with a moving spinner
+
+    spinner moves only once .animate() is called and moves forever
+    unless .done() is called.
+
+    Once .done() is called, spinner is removed and done-passed text is shown.
+
+    At all time, text can be changed with .set-message"""
+
     _steps = ("⠄", "⠆", "⠇", "⠋", "⠙", "⠸", "⠰", "⠠")
     _interval_ms = 80
 
