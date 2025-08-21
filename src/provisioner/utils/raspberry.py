@@ -23,7 +23,7 @@ DEVICETREE_PATH = (
 BOOTORDER_RE = re.compile(
     r"^BOOT_ORDER\s*=\s*(?P<value>0X[0-9A-Fa-f]+)\s*$", re.IGNORECASE
 )
-POWEROFFONHALT_RE = re.compile(r"POWER_OFF_ON_HALT\s*=*(?P<value>[0-1])\s")
+POWEROFFONHALT_RE = re.compile(r"^POWER_OFF_ON_HALT\s*=\s*(?P<value>[0-1])\s*$")
 
 
 class BootValue(StrEnum):
