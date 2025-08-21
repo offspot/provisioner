@@ -97,7 +97,7 @@ REGULATORY_DOMAINS: dict[str, str] = {
     "QA": "Qatar",
 }
 
-BOOT_ORDER = ["USB_MSD", "NVME", "SD_CARD", "HTTP", "RESTART"]
+BOOT_ORDER = ["NVME", "USB_MSD", "SD_CARD", "HTTP", "RESTART"]
 
 RTC_CHARGING_VOLTAGE = 3.0
 
