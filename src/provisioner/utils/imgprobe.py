@@ -170,11 +170,19 @@ class ImageFileInfo:
             if root_parts:
                 has_root = True
 
-                attached_img = attach_image(fpath=fpath, partition=root_parts[0].number)
-                logger.debug(attached_img)
-                linux_info = get_linux_info(mountpoint=attached_img.mountpoint)
+                attached_imgs = [
+                    attach_image(fpath=fpath, partition=root_part.number)
+                    for root_part in root_parts
+                ]
+                logger.debug(attached_imgs)
+                linux_info = get_linux_info(
+                    mountpoints=[
+                        attached_img.mountpoint for attached_img in attached_imgs
+                    ]
+                )
                 logger.debug(linux_info)
-                detach_image(attached_img)
+                for attached_img in reversed(attached_imgs):
+                    detach_image(attached_img)
 
         except Exception as exc:
             logger.error(f"PARTED ERR: {exc}")
@@ -205,11 +213,24 @@ def parse_envfile(text: str) -> dict[str, str]:
     return result
 
 
-def get_linux_info(mountpoint: Path) -> SystemDetails:
+def get_linux_info(mountpoints: list[Path]) -> SystemDetails:
     """reads a mountpoint as if rootfs to check for system identification"""
 
     def get_file(fname: str) -> Path:
-        return mountpoint.joinpath("etc").joinpath(fname)
+        """First existing file on etc/ for reversed mountpoints
+
+        mountpoints are checked in reversed order (sorted by partnum) to give
+        priority to file on higher (non-root usually) partitions
+
+        First match is returned.
+
+        If file exists on no mountpoint, the path on first (lower partnum) is returned
+        """
+        for mountpoint in reversed(mountpoints):
+            fpath = mountpoint.joinpath("etc").joinpath(fname)
+            if fpath.exists():
+                break
+        return fpath
 
     offspot = get_file("offspot.json")
     if offspot.exists():
@@ -355,8 +376,9 @@ def attach_image(fpath: Path, partition: int) -> AttachedImage:
 
 
 def detach_image(image: AttachedImage):
-    logger.debug(f"detaching {image}")
+    logger.debug(
+        f"detaching {image}: unmounting {image.mountpoint} and dettach {image.diskdev}"
+    )
     unmount(image.mountpoint)
-    # detach_device(loop_dev=str(image.partdev), failsafe=False)
     detach_device(loop_dev=str(image.diskdev), failsafe=False)
     image.mountpoint.rmdir()
