@@ -232,7 +232,7 @@ def get_linux_info(mountpoint: Path) -> SystemDetails:
     offspot_base = get_file("hostname")
     if offspot_base.exists():
         try:
-            data = offspot_base.read_text()
+            data = offspot_base.read_text().strip()
             if data == "offspot-base":
                 return SystemDetails(
                     is_linux=True,
