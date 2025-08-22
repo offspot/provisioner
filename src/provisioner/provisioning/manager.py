@@ -3,11 +3,11 @@ from collections.abc import Generator
 
 from provisioner.context import Context
 from provisioner.provisioning.bootorder import BootOrderStep
+from provisioner.provisioning.charger import EnableChargerStep
 from provisioner.provisioning.common import Environment, ImplementsProgress, Step
 from provisioner.provisioning.docker import DockerStep
 from provisioner.provisioning.hwclock import HardwareClockStep
 from provisioner.provisioning.imager import PiImagerStep
-from provisioner.provisioning.offspotyaml import OffspotYAMLStep
 from provisioner.provisioning.resizepart import ResizePartitionStep
 
 context = Context.get()
@@ -18,10 +18,11 @@ class ProvisionManager:
     STEPS: tuple[type[Step], ...] = (
         HardwareClockStep,
         PiImagerStep,
-        BootOrderStep,
+        EnableChargerStep,
         ResizePartitionStep,
-        OffspotYAMLStep,
+        # OffspotYAMLStep,  # no update ATM
         DockerStep,
+        BootOrderStep,
     )
 
     def __init__(

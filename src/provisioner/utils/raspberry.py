@@ -3,6 +3,7 @@ import shutil
 import tempfile
 from enum import StrEnum
 from pathlib import Path
+from typing import Self
 
 import attrs.validators
 from attrs import define, field
@@ -110,3 +111,65 @@ def update_eeprom(*, verbose: bool = False):
         check=True,
     )
     config_path.unlink(missing_ok=True)
+
+
+class BootConfig(dict):
+    """Manager for content of /boot/firmware/config.txt firmware config file"""
+
+    @classmethod
+    def parse(cls, text: str) -> Self:
+        board_type_re = re.compile(r"^\[board-type=(?P<name>\d+)\]$")
+        filter_re = re.compile(r"^\[(?P<name>[a-z0-9\+]+)\]$")
+        data = {}
+        currrent_filter = ""
+        for line in text.splitlines():
+            if m := board_type_re.match(line):
+                currrent_filter = m.groupdict()["name"]
+            elif m := filter_re.match(line):
+                currrent_filter = m.groupdict()["name"]
+            else:
+                if currrent_filter not in data:
+                    data[currrent_filter] = []
+                data[currrent_filter].append(line)
+        return cls(data)
+
+    def remove_key(self, key: str, *, only_in: list[str] | None = None):
+        """remove line for this key in every filter or selected ones"""
+        for fname, f_lines in self.items():
+            if only_in and key not in only_in:
+                continue
+            for index, line in enumerate(f_lines):
+                if line.startswith(f"{key}="):
+                    del self[fname][index]
+
+    def add_key(self, key: str, value: str, cfilter: str = "all"):
+        if cfilter not in self:
+            self[cfilter] = []
+        self[cfilter].append(f"{key}={value}")
+
+    def serialize(self) -> str:
+        # start with no filter ones (convewntion)
+        lines: list[str] = []
+        if "" in self:
+            lines += self[""]
+
+        for f_name, f_lines in self.items():
+            if f_name in ("", "all"):
+                continue
+
+            # no need to fill empty filters
+            if not f_lines:
+                continue
+            # add empty line before filter change is there was none
+            if lines and lines[-1]:
+                lines += [""]
+
+            lines += [f"[{f_name}]", *f_lines]
+
+        # end with the all ones (convention)
+        if self.get("all", []):
+            if lines and lines[-1]:
+                lines += [""]
+            lines += ["[all]", *self["all"]]
+
+        return "\n".join(lines)

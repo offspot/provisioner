@@ -1,18 +1,19 @@
 import os
 
+from provisioner.constants import RTC_CHARGING_VOLTAGE
 from provisioner.context import Context
 from provisioner.provisioning.common import Step, StepResult
 from provisioner.utils.blk.misc import mount_to_temp, unmount
-from provisioner.utils.yaml import yaml_dump, yaml_load
+from provisioner.utils.raspberry import BootConfig
 
 context = Context.get()
 logger = context.logger
 
 
-class OffspotYAMLStep(Step):
+class EnableChargerStep(Step):
 
-    ident: str = "offspot"
-    name: str = "Update offspot.yaml for runtime configuration"
+    ident: str = "charger"
+    name: str = "Enable RTC Battery Charger"
     reports_progress: bool = False
     progress_interval_ms: int = 1000
 
@@ -21,15 +22,17 @@ class OffspotYAMLStep(Step):
         boot_part_dev = root_dev.with_name(f"{root_dev.name}p1")  # /dev/nvme0n1p1
         mountpoint = mount_to_temp(boot_part_dev, rw=True)
         try:
-            offspot_yaml = mountpoint.joinpath("offspot.yaml")
-            config = yaml_load(offspot_yaml.read_text())
-
-            # ADD runtime update HERE
-
-            offspot_yaml.write_text(yaml_dump(config))
+            config_path = mountpoint.joinpath("config.txt")
+            config = BootConfig.parse(config_path.read_text())
+            config.add_key(
+                key="dtparam=rtc_bbat_vchg",
+                value=str(int(RTC_CHARGING_VOLTAGE * 1000000)),
+                cfilter="pi5",
+            )
+            config_path.write_text(config.serialize())
             os.sync()
             if verbose:
-                logger.info(f"{offspot_yaml=}:\n{offspot_yaml.read_text()}")
+                logger.info(f"{config_path=}:\n{config_path.read_text()}")
         except Exception as exc:
             return StepResult(
                 succeeded=False,
