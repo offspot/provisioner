@@ -71,7 +71,7 @@ def find_file(under: Path, named: str) -> Path:
     """Path from a directory and fname where fname can be anywhere in subtree"""
     try:
         return next(under.rglob(named))
-    except IndexError:
+    except StopIteration:
         return under.joinpath(named)
 
 
