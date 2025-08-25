@@ -14,7 +14,7 @@ from attrs import define
 from nmcli import device as nmdevice
 from nmcli.data.device import DeviceWifi
 
-from provisioner.constants import ETH_IFACE, WL_IFACE
+from provisioner.constants import ETH_IFACE, USER_AGENT, WL_IFACE
 from provisioner.context import Context
 from provisioner.utils.misc import padding, run_command
 
@@ -232,7 +232,12 @@ class InternetCheckResult:
     def test_http(url: str = "http://wikipedia.org") -> bool:
         try:
             return (
-                requests.get(url, timeout=8, allow_redirects=True).status_code
+                requests.get(
+                    url,
+                    timeout=8,
+                    allow_redirects=True,
+                    headers={"User-Agent": USER_AGENT},
+                ).status_code
                 == HTTPStatus.OK
             )
         except Exception:
@@ -242,7 +247,12 @@ class InternetCheckResult:
     def test_https(url: str = "https://wikipedia.org") -> bool:
         try:
             return (
-                requests.get(url, timeout=8, allow_redirects=True).status_code
+                requests.get(
+                    url,
+                    timeout=8,
+                    allow_redirects=True,
+                    headers={"User-Agent": USER_AGENT},
+                ).status_code
                 == HTTPStatus.OK
             )
         except Exception:
@@ -255,7 +265,7 @@ class InternetCheckResult:
                 url,
                 timeout=8,
                 allow_redirects=True,
-                headers={"User-Agent": "curl/8.7.1"},
+                headers={"User-Agent": USER_AGENT},
             )
             if resp.status_code == HTTPStatus.OK:
                 payload = resp.json()
