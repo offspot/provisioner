@@ -101,7 +101,10 @@ class ImageFileInfo:
                 name += " with partition(s)"
             return name
         if self.is_hotspot:
-            return f"Kiwix Hotspot “{self.linux.variant}” version {self.version}"
+            return (
+                f"Kiwix Hotspot “{self.linux.variant or 'Unknown'}”"
+                f" version {self.version}"
+            )
         if self.is_raspi:
             return f"Raspberry Pi OS version {self.linux.version}"
         name = self.linux.release or "Unknown"
