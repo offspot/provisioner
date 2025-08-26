@@ -24,7 +24,6 @@ DEVICETREE_PATH = (
 BOOTORDER_RE = re.compile(
     r"^BOOT_ORDER\s*=\s*(?P<value>0X[0-9A-Fa-f]+)\s*$", re.IGNORECASE
 )
-POWEROFFONHALT_RE = re.compile(r"^POWER_OFF_ON_HALT\s*=\s*(?P<value>[0-1])\s*$")
 
 
 class BootValue(StrEnum):
@@ -89,13 +88,14 @@ def update_eeprom(*, verbose: bool = False):
         [shutil.which("rpi-eeprom-config")], capture_output=True, text=True, check=True
     )
     new_lines = []
+    found = {"BOOT_ORDER": False}
     for line in ps.stdout.splitlines():
         if BOOTORDER_RE.match(line.strip()):
             new_lines.append(f"BOOT_ORDER={new_bootorder.value}")
-        elif POWEROFFONHALT_RE.match(line.strip()):
-            new_lines.append("POWER_OFF_ON_HALT=1")
         else:
             new_lines.append(line)
+    if not found["BOOT_ORDER"]:
+        new_lines.append(f"BOOT_ORDER={new_bootorder.value}")
     config_path = Path(
         tempfile.NamedTemporaryFile(
             prefix="epprom_config_", suffix=".txt", delete=False
