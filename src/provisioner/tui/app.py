@@ -110,7 +110,7 @@ class App:
 
     def on_unhandled_input(self, key: str | tuple[str, int, int, int]) -> None:
         if key == "f5":
-            if self.pane and hasattr(self.pane, "refresh"):
+            if self.pane:
                 self.pane.refresh()
         if key in {"q", "Q"}:
             if self.pane:

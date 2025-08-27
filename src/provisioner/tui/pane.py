@@ -71,6 +71,8 @@ class Pane:
 
     def stop(self): ...
 
+    def refresh(self): ...
+
     def update(self):
         self.app.update()
 
