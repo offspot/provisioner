@@ -58,6 +58,21 @@ class LoadingPane(Pane):
         self.append_to(pile, self.menu)
         pile.focus_item = self.menu
 
+        self.status = "init"
+
+        self.refresh()
+
+    def refresh(self, *args):  # noqa: ARG002
+        if self.status == "gathering":
+            return
+        # remove menu if present
+        if self.status == "ready":
+            self.menu.contents.pop(0)
+            self.menu.contents.pop(0)
+
+        self.status = "gathering"
+
+        self.loading_text.set_message("Gathering information…")
         # request spinner text to animate
         self.loading_text.animate(self.uloop)
 
@@ -97,6 +112,7 @@ class LoadingPane(Pane):
         )
         self.menu.focus_col = 0
         self.update()
+        self.status = "ready"
 
     def on_provision_selected(self, *args):  # noqa: ARG002
         self.app.switch_to("provision")
