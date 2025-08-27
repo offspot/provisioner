@@ -104,7 +104,7 @@ class ConfirmingBoxButton(uw.PopUpLauncher):
             self.original_widget.hidden_button, "click", lambda _: self.open_pop_up()
         )
 
-    def create_pop_up(self) -> ConfirmPopupDialog:
+    def create_pop_up(self) -> uw.Widget:
         pop_up = ConfirmPopupDialog(
             on_press=self.on_confirm,
             question_text=self.question_text,
@@ -118,7 +118,7 @@ class ConfirmingBoxButton(uw.PopUpLauncher):
         return {"left": 0, "top": 1, "overlay_width": 40, "overlay_height": 10}
 
 
-class InfoPopupDialog(ConfirmPopupDialog):
+class InfoPopupDialog(uw.PopUpLauncher):
 
     signals: typing.ClassVar[list[str]] = ["close"]
 
@@ -168,7 +168,7 @@ class InfoPopupBoxButton(uw.PopUpLauncher):
             self.original_widget.hidden_button, "click", lambda _: self.open_pop_up()
         )
 
-    def create_pop_up(self) -> ConfirmPopupDialog:
+    def create_pop_up(self) -> uw.Widget:
         pop_up = InfoPopupDialog(
             message=self.message,
             btn_label=self.btn_label,
