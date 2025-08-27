@@ -9,7 +9,7 @@ from provisioner.context import Context
 from provisioner.host import ProvisionHost
 from provisioner.provisioning.common import Environment
 from provisioner.provisioning.manager import ProvisionManager
-from provisioner.utils.blk.devices import Disk
+from provisioner.utils.blk.devices import Device, Disk
 from provisioner.utils.misc import format_duration, format_size
 
 logger = Context.logger
@@ -39,11 +39,15 @@ def main(
         click.secho(f"Source device ({source_device_path}) not found", fg="red")
         return CliResult(code=3)
 
-    img_dev_root = (
-        Disk(**asdict(image_device.parent)).path
-        if image_device.parent
-        else image_device.path
-    )
+    if image_device.parent:
+        payload = (
+            asdict(image_device.parent)
+            if isinstance(image_device.parent, Device)
+            else image_device.parent
+        )
+        img_dev_root = Disk(**payload).path
+    else:
+        img_dev_root = image_device.path
 
     if img_dev_root not in [d.path for d in host.dev.source_disks] and not assume_yes:
         if not click.confirm(
