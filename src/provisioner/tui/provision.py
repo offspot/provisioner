@@ -5,7 +5,7 @@ from threading import Thread
 
 import urwid as uw
 
-from provisioner.constants import FAILURE_SOUNDS, RC_REBOOT, SUCCESS_SOUNDS
+from provisioner.constants import FAILURE_SOUNDS, RC_HALT, RC_REBOOT, SUCCESS_SOUNDS
 from provisioner.context import Context
 from provisioner.provisioning.common import Environment, ImagerStats, Step
 from provisioner.provisioning.manager import ProvisionManager
@@ -181,6 +181,7 @@ class ProvisionPane(Pane):
 
     def on_image_selected(self, image: ImageFileInfo, *args):  # noqa: ARG002
         self.image = image
+
         self.menu.contents.clear()
         self.header_text = uw.Text("Confirm provisioning", align=uw.Align.CENTER)
         self.append_to(
@@ -432,8 +433,8 @@ class ProvisionPane(Pane):
         self.append_to(self.menu, self.a_divider)
         content = f"\n{message}\n"
         content += (
-            "Please remove Provision-OS disk "
-            f"({self.host.dev.provisionos_disk}) and reboot.\n"
+            "You can now shut the device down, remove all external devices\n"
+            "and start testing.\n"
         )
         self.append_to(
             self.menu,
@@ -449,7 +450,7 @@ class ProvisionPane(Pane):
             uw.Columns(
                 [
                     uw.Divider(),
-                    BoxButton(label="Reboot", on_press=self.reboot),
+                    BoxButton(label="Shutdown", on_press=self.shutdown),
                     uw.Divider(),
                 ]
             ),
@@ -516,6 +517,9 @@ class ProvisionPane(Pane):
 
     def reboot(self, *args):  # noqa: ARG002
         self.app.stop(exit_code=RC_REBOOT)
+
+    def shutdown(self, *args):  # noqa: ARG002
+        self.app.stop(exit_code=RC_HALT)
 
     def go_home(self, *args):  # noqa: ARG002
         self.app.switch_to("loading")
