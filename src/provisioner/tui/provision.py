@@ -165,6 +165,8 @@ class ProvisionPane(Pane):
         else:
             self.menu.focus_position = 2  # first is intro text
 
+        self.append_to(self.menu, uw.Button("Cancel", on_press=self.go_home))
+
         decorated_menu = uw.Padding(
             self.menu,
             align=uw.Align.CENTER,
