@@ -332,7 +332,7 @@ class NetworkPane(Pane):
         try:
             nmconn.delete(name=self.host.network.ifaces[ETH_IFACE].connection)
         except Exception:
-            raise
+            ...
 
         self.loading_text.done("")
         return self.on_success(f"WiFi now configured: {self.network.name}")
