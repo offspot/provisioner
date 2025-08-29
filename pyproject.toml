@@ -20,7 +20,7 @@ dependencies = [
     "babel==2.17.0",
     "python-dateutil==2.9.0.post0",
     "click==8.2.1",
-    "questionary==2.1.0",
+    "questionary==2.1.1",
     "requests==2.32.4",
     "pycountry==24.6.1",
     "pyparted==3.13.0 ; platform_system == 'Linux'",
