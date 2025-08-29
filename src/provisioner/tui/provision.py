@@ -127,18 +127,21 @@ class ProvisionPane(Pane):
         if self.menu_in_pile:
             self.menu.contents.clear()
             pile.contents.pop()
+            self.menu_in_pile = False
 
-        if self.host.dev.has_single_image:
-            return self.on_image_selected(self.host.dev.images[0])
-
-        filtered_images: list[ImageFileInfo] = list(
-            filter(lambda img: img.size > self.target_disk.size, self.host.dev.images)
+        usable_images: list[ImageFileInfo] = list(
+            filter(lambda img: img.size <= self.target_disk.size, self.host.dev.images)
         )
+        nb_filtered_out_images = len(self.host.dev.images) - len(usable_images)
+
+        if len(usable_images) == 1:
+            self.on_image_selected(has_multiple_images=False, image=usable_images[0])
+            return
 
         # display image selector
         title_text = "Select source Image"
-        if filtered_images:
-            title_text += f" ({len(filtered_images)} excluded as too large for disk)"
+        if nb_filtered_out_images:
+            title_text += f" ({nb_filtered_out_images} excluded as too large for disk)"
         self.append_to(
             self.menu,
             uw.AttrMap(
@@ -148,16 +151,13 @@ class ProvisionPane(Pane):
         )
         self.append_to(self.menu, self.a_divider)
 
-        for image in self.host.dev.images:
-            if image in filtered_images:
-                continue
-
+        for image in usable_images:
             self.append_to(
                 self.menu,
                 uw.Button(
                     f"{padding(format_size(image.size), 10)} "
                     f"{image.name} ({image.fpath.name})",
-                    on_press=functools.partial(self.on_image_selected, image),
+                    on_press=functools.partial(self.on_image_selected, True, image),
                 ),
             )
         if hasattr(self, "image"):
@@ -176,13 +176,25 @@ class ProvisionPane(Pane):
         self.append_to(pile, decorated_menu)
         self.menu_in_pile = True
         pile.focus_position = len(pile.contents) - 1
-
         self.update()
 
-    def on_image_selected(self, image: ImageFileInfo, *args):  # noqa: ARG002
+    def on_image_selected(
+        self,
+        has_multiple_images: bool,  # noqa: FBT001
+        image: ImageFileInfo,
+        *args,  # noqa: ARG002
+    ):
         self.image = image
 
-        self.menu.contents.clear()
+        pile: uw.Pile = (
+            self.main_widget.base_widget
+        )  # pyright: ignore reportAssignmentType
+        if self.menu_in_pile:
+            self.menu.contents.clear()
+            pile.contents.pop()
+            self.menu_in_pile = False
+
+        # self.menu.contents.clear()
         self.header_text = uw.Text("Confirm provisioning", align=uw.Align.CENTER)
         self.append_to(
             self.menu,
@@ -248,13 +260,28 @@ class ProvisionPane(Pane):
             self.menu,
             uw.Columns(
                 [
-                    BoxButton("Cancel", on_press=self.on_cancel),
+                    BoxButton(
+                        "Cancel",
+                        on_press=(
+                            self.on_cancel if has_multiple_images else self.go_home
+                        ),
+                    ),
                     uw.Divider(),
                     BoxButton("Let's Go!", on_press=self.on_confirm),
                 ]
             ),
         )
+
         self.menu.focus_position = len(self.menu.contents) - 1
+        decorated_menu = uw.Padding(
+            self.menu,
+            align=uw.Align.CENTER,
+            width=(uw.WHSettings.RELATIVE, 50),
+            min_width=50,
+        )
+        self.append_to(pile, decorated_menu)
+        self.menu_in_pile = True
+        pile.focus_position = len(pile.contents) - 1
         self.update()
 
     def on_cancel(self, *args):  # noqa: ARG002
