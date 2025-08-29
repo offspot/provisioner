@@ -31,8 +31,8 @@ class ProvisionHost:
     def query_all(self) -> None:
         self.query_ids()
         self.query_devices()
-        self.query_hwclock()
         self.query_network()
+        self.query_hwclock()
         self.ready = True
         self.queried_on = get_now()
 
@@ -57,6 +57,10 @@ class ProvisionHost:
     def query_hwclock(self) -> None:
         self.clock = ClockManager()
         self.clock.query()
+        # in case we are not NTP-synced and we are network-connected
+        # re-request NTP sync
+        if not self.clock.tdctl.ntp_synced and (self.network and self.network.all_good):
+            self.clock.requery()
 
     @property
     def provision_ready(self) -> tuple[bool, str]:

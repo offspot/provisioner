@@ -1,6 +1,7 @@
 import datetime
 import os
 import subprocess
+import time
 import zoneinfo
 
 import dateutil.parser
@@ -8,6 +9,7 @@ from attrs import define
 
 from provisioner.context import Context
 from provisioner.utils.hwclock import RTCBatteryCharger
+from provisioner.utils.misc import run_command
 
 context = Context.get()
 
@@ -104,6 +106,12 @@ class TimedatectlData:
         if self.has_rtc:
             self.rtc_time = parse_date(self.raw_data["RTCTimeUSec"])
 
+    @classmethod
+    def request_sync(cls):
+        run_command(
+            ["/usr/bin/env", "systemctl", "restart", "systemd-timesyncd.service"]
+        )
+
     @property
     def failed(self) -> bool:
         return self.retcode != 0
@@ -149,3 +157,8 @@ class ClockManager:
     def query(self):
         self.tdctl = TimedatectlData.load()
         self.rtc_charger = RTCBatteryCharger.load()
+
+    def requery(self):
+        self.tdctl.request_sync()
+        time.sleep(2)
+        self.query()
