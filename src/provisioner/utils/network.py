@@ -381,7 +381,8 @@ class NetworkManager:
     @property
     def all_good(self) -> bool:
         return (
-            self.internet.https
+            self.internet
+            and self.internet.https
             and not self.is_not_connected
             and not self.is_multi_connected
         )

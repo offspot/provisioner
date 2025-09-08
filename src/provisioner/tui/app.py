@@ -1,4 +1,5 @@
 import asyncio
+import os
 import signal
 import sys
 import traceback
@@ -104,6 +105,9 @@ class App:
             colors=2**24
         )
 
+        # pipe to request UI update (will happen on main thread)
+        self.update_pipe = self.uloop.watch_pipe(lambda _: None)
+
         from provisioner.tui.pane import Pane  # noqa: PLC0415
 
         self.pane: Pane | None = None
@@ -142,10 +146,8 @@ class App:
         }[pane](self)
 
     def update(self):
-        try:
-            self.uloop.draw_screen()
-        except Exception:
-            ...
+        """request UI to update"""
+        os.write(self.update_pipe, b" ")
 
     def start(self, pane: str = "loading"):
         self.switch_to(pane=pane)
@@ -157,6 +159,7 @@ class App:
     def stop(self, exit_code: int):
         self.exit_code = exit_code
         self.on_unhandled_input(key="q")
+        os.close(self.update_pipe)
 
 
 def main() -> int:

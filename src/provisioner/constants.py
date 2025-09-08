@@ -4,6 +4,7 @@ NAME_HUMAN = "Hotspot Provisioner"
 
 ETH_IFACE: str = "eth0"
 WL_IFACE: str = "wlan0"
+REFRESHING_INTERVAL_SECONDS: int = 30
 
 RC_CANCELED: int = 12
 RC_ADVANCED: int = 40

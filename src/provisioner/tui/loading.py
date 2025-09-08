@@ -1,8 +1,15 @@
+import time
 from threading import Thread
 
 import urwid as uw
 
-from provisioner.constants import ASCII_LOGO, RC_ADVANCED, RC_HALT, RC_REBOOT
+from provisioner.constants import (
+    ASCII_LOGO,
+    RC_ADVANCED,
+    RC_HALT,
+    RC_REBOOT,
+    REFRESHING_INTERVAL_SECONDS,
+)
 from provisioner.tui.boxbutton import BoxButton, ConfirmingBoxButton, InfoPopupBoxButton
 from provisioner.tui.pane import Pane
 from provisioner.tui.spinner import SpinnerText
@@ -11,6 +18,8 @@ from provisioner.tui.spinner import SpinnerText
 class LoadingPane(Pane):
 
     def render(self):
+        self.keep_refreshing = False
+
         self.loading_text = SpinnerText("Gathering information…", align="center")
 
         # paint solid background with vertical stack
@@ -70,18 +79,25 @@ class LoadingPane(Pane):
             self.menu.contents.pop(0)
             self.menu.contents.pop(0)
 
-        self.status = "gathering"
+        self.show_as_loading()
 
+        # start thread gathering infos from host
+        Thread(target=self.gather_infos).start()
+
+    def show_as_loading(self):
+        """display the spinner"""
+        self.status = "gathering"
         self.loading_text.set_message("Gathering information…")
         # request spinner text to animate
         self.loading_text.animate(self.uloop)
+        self.update()
 
-        # start thread gathering infos from host
-        thread = Thread(target=self.gather_infos)
-        thread.start()
+    def show_as_ready(self, *, pop_menu: bool):
+        """show the manu according to status"""
+        if pop_menu:
+            self.menu.contents.pop(0)
+            self.menu.contents.pop(0)
 
-    def gather_infos(self):
-        self.host.query_all()
         self.loading_text.done(
             f"Ready for {self.host.model!s} – "  # noqa: RUF001
             f"S/N: {self.host.serial_number.upper()}"
@@ -113,6 +129,37 @@ class LoadingPane(Pane):
         self.menu.focus_col = 0
         self.update()
         self.status = "ready"
+
+    def gather_infos(self):
+        self.host.query_all()
+        self.show_as_ready(pop_menu=False)
+
+        self.keep_refreshing = True
+        Thread(target=self.keep_refreshing_network).start()
+
+    def do_refresh_network(self):
+        self.host.query_network()
+        self.host.query_hwclock()
+
+    def keep_refreshing_network(self):
+        sleep_interval = 0.2
+        ticks = REFRESHING_INTERVAL_SECONDS / sleep_interval
+        counter = 0
+        while self.keep_refreshing:
+            if self.status != "ready":
+                time.sleep(1)
+                continue
+            if counter >= ticks:
+                counter = 0
+                self.show_as_loading()
+                self.do_refresh_network()
+                self.show_as_ready(pop_menu=True)
+            else:
+                time.sleep(sleep_interval)
+                counter += 1
+
+    def stop(self):
+        self.keep_refreshing = False
 
     def on_provision_selected(self, *args):  # noqa: ARG002
         self.app.switch_to("provision")
