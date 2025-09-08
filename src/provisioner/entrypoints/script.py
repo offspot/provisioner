@@ -18,6 +18,7 @@ def main() -> int:
             ps = subprocess.run(command, check=False)
         except KeyboardInterrupt as exc:
             print(exc)  # noqa: T201
+            print("Use (physical) power button to shutdown computer")  # noqa: T201
             return RC_KILL
         except Exception as exc:
             print(exc)  # noqa: T201
@@ -29,13 +30,14 @@ def main() -> int:
             command = [sysctl, "reboot"]
             continue
         if ps.returncode == RC_HALT:
-            command = [sysctl, "halt"]
+            command = [sysctl, "poweroff"]
             continue
         if ps.returncode == RC_UI:
             command = [str(bin_dir.joinpath("provisioner-ui"))]
             continue
         if ps.returncode >= RC_KILL:
             print("Exit via signal, exiting (dev)")  # noqa: T201
+            print("Use (physical) power button to shutdown computer")  # noqa: T201
             return ps.returncode
     return 0
 
