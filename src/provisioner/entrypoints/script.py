@@ -3,7 +3,14 @@ import subprocess
 import sys
 from pathlib import Path
 
-from provisioner.constants import RC_ADVANCED, RC_HALT, RC_KILL, RC_REBOOT, RC_UI
+from provisioner.constants import (
+    RC_ADVANCED,
+    RC_EXIT,
+    RC_HALT,
+    RC_KILL,
+    RC_REBOOT,
+    RC_UI,
+)
 
 
 def main() -> int:
@@ -35,9 +42,14 @@ def main() -> int:
         if ps.returncode == RC_UI:
             command = [str(bin_dir.joinpath("provisioner-ui"))]
             continue
+        if ps.returncode == RC_EXIT:
+            print("Dropping to shell at user request (Q).")  # noqa: T201
+            print("Enter `exit` to restart provisioner.")  # noqa: T201
+            print("Use (physical) power button to shutdown computer.")  # noqa: T201
+            return ps.returncode
         if ps.returncode >= RC_KILL:
             print("Exit via signal, exiting (dev)")  # noqa: T201
-            print("Use (physical) power button to shutdown computer")  # noqa: T201
+            print("Use (physical) power button to shutdown computer.")  # noqa: T201
             return ps.returncode
     return 0
 

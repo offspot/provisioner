@@ -11,7 +11,9 @@ RC_ADVANCED: int = 40
 RC_REBOOT: int = 20
 RC_HALT: int = 30
 RC_UI: int = 50
+RC_EXIT: int = 60
 RC_KILL: int = 128
+
 
 REGULATORY_DOMAINS: dict[str, str] = {
     "US": "United States",
@@ -114,9 +116,7 @@ ASCII_LOGO = r"""
 ▐░▌       ▐░▌▐░█▄▄▄▄▄▄▄█░▌     ▐░▌      ▄▄▄▄▄▄▄▄▄█░▌▐░▌          ▐░█▄▄▄▄▄▄▄█░▌     ▐░▌     
 ▐░▌       ▐░▌▐░░░░░░░░░░░▌     ▐░▌     ▐░░░░░░░░░░░▌▐░▌          ▐░░░░░░░░░░░▌     ▐░▌     
  ▀         ▀  ▀▀▀▀▀▀▀▀▀▀▀       ▀       ▀▀▀▀▀▀▀▀▀▀▀  ▀            ▀▀▀▀▀▀▀▀▀▀▀       ▀      
-""".strip(
-    "\n"
-)
+""".strip("\n")
 
 USB_BUS_SPEED_PER_SECOND = "375MiB"
 

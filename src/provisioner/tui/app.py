@@ -7,6 +7,7 @@ from types import FrameType
 
 import urwid as uw
 
+from provisioner.constants import RC_EXIT
 from provisioner.context import Context
 from provisioner.host import ProvisionHost
 
@@ -44,7 +45,6 @@ class ExceptionHandlingLoop(uw.AsyncioEventLoop):
 
 
 class App:
-
     palette = (
         # name, foreground, background, mono, foreground_high, background_high
         ("banner", "", "", "", "#ffa", "#FD5"),
@@ -117,11 +117,13 @@ class App:
             if self.pane:
                 self.pane.refresh()
         if key in {"q", "Q"}:
+            self.exit_code = RC_EXIT
             if self.pane:
                 self.pane.stop()
             if self.uloop:
                 aio_loop.stop()
                 self.uloop.stop()
+            os.close(self.update_pipe)
         # print(f"Received {key=}", flush=True)
 
     def reset_ui(self):
@@ -162,11 +164,9 @@ class App:
     def stop(self, exit_code: int):
         self.exit_code = exit_code
         self.on_unhandled_input(key="q")
-        os.close(self.update_pipe)
 
 
 def main() -> int:
-
     app = App()
 
     def exit_gracefully(signum: int, frame: FrameType | None):  # noqa: ARG001
