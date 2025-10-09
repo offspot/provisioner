@@ -36,8 +36,7 @@ class ProvisionPane(Pane):
         self.uloop.widget = uw.AttrMap(uw.SolidFill(), "bg_prov")
         self.main_widget = uw.Filler(uw.Pile([], focus_item=1), valign="top")
 
-        if (get_now() - self.host.queried_on).total_seconds() > one_minute:
-            return self.render_without_host()
+        # consider host to be valid
         self.render_with_host()
 
     def render_without_host(self):
