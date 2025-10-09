@@ -18,7 +18,7 @@ from provisioner.utils.misc import get_now, run_step_command
 
 context = Context.get()
 logger = context.logger
-stdout_copy_folder = Path("dev_shm" if context.fake_pi else "/dev/shm")
+stdout_copy_folder = Path("dev_shm" if context.fake_pi else "/dev/shm")  # noqa: S108
 
 
 class RpiImager:
