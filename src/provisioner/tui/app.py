@@ -147,7 +147,10 @@ class App:
 
     def update(self):
         """request UI to update"""
-        os.write(self.update_pipe, b" ")
+        try:
+            os.write(self.update_pipe, b" ")
+        except OSError:
+            pass
 
     def start(self, pane: str = "loading"):
         self.switch_to(pane=pane)
