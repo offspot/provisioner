@@ -92,8 +92,10 @@ def update_eeprom(*, verbose: bool = False):
     found = {"BOOT_ORDER": False, "HDMI_DELAY": False}
     for line in ps.stdout.splitlines():
         if BOOTORDER_RE.match(line.strip()):
+            found["BOOT_ORDER"] = True
             new_lines.append(f"BOOT_ORDER={new_bootorder.value}")
         elif HDMI_DELAY_RE.match(line.strip()):
+            found["HDMI_DELAY"] = True
             new_lines.append("HDMI_DELAY=1")
         else:
             new_lines.append(line)
