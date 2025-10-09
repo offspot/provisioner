@@ -193,6 +193,10 @@ class InternetCheckResult:
     public_ip: str | None
 
     @classmethod
+    def uninited(cls) -> InternetCheckResult:
+        return cls(connect_ip=False, http=False, https=False, public_ip=None)
+
+    @classmethod
     def load(cls) -> InternetCheckResult:
         connect_ip = http = https = False
         public_ip = None
@@ -366,7 +370,9 @@ class NetworkManager:
     ifaces: dict[str, Interface]
     internet: InternetCheckResult
 
-    def __init__(self) -> None: ...
+    def __init__(self) -> None:
+        self.ifaces = {}
+        self.internet = InternetCheckResult.uninited()
 
     @property
     def connected_to(self) -> ConnectedTo:
