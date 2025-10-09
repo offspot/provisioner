@@ -6,7 +6,9 @@ import re
 import select
 import shutil
 import subprocess
+import tempfile
 import time
+from pathlib import Path
 from threading import Thread
 
 from provisioner.context import Context
@@ -16,6 +18,7 @@ from provisioner.utils.misc import get_now, run_step_command
 
 context = Context.get()
 logger = context.logger
+stdout_copy_folder = Path("dev_shm" if context.fake_pi else "/dev/shm")
 
 
 class RpiImager:
@@ -24,7 +27,7 @@ class RpiImager:
     stdout: str
     ps: subprocess.Popen[str]
 
-    def __init__(self, args: list[str]) -> None:
+    def __init__(self, args: list[str], copy_stdout_to: Path | None = None) -> None:
         self.args = args
 
         self.started_on: datetime.datetime = datetime.datetime.now(tz=datetime.UTC)
@@ -48,10 +51,11 @@ class RpiImager:
 
         self.output_reader = Thread(target=self.consume_pty)
 
+        self.stdout_copy: Path | None = copy_stdout_to
+
     def start(
         self,
     ):
-
         self.ps = subprocess.Popen(
             self.args,
             text=True,
@@ -72,6 +76,16 @@ class RpiImager:
         while self.ps.returncode is None:
             self.read_output()
             self.parse()
+
+    def append_to_copy(self, content: str):
+        if not self.stdout_copy:
+            return
+        try:
+            with self.stdout_copy.open("a") as fh:
+                fh.write(content)
+        except Exception as exc:
+            logger.error(f"Unable to append to stdout copy: {exc}")
+            raise exc
 
     def read_output(self):
         bufsize = 1024
@@ -98,6 +112,7 @@ class RpiImager:
                             .decode("UTF-8")
                         )
                         self.stdout += content
+                        self.append_to_copy(content)
         except OSError as exc:
             if exc.errno != errno.EBADF:
                 raise exc
@@ -238,7 +253,6 @@ class RpiImager:
 
 
 class PiImagerStep(Step):
-
     ident: str = "imager"
     name: str = "Flash image onto target disk"
     reports_progress: bool = True
@@ -256,7 +270,6 @@ class PiImagerStep(Step):
         return self.imager.step
 
     def run(self, *, verbose: bool = False) -> StepResult:
-
         mountpoint = mount_to_temp(self.environment.image_device.path)
         fpath = mountpoint.joinpath(self.environment.image.relpath)
         target = self.environment.target_disk.path
@@ -275,6 +288,9 @@ class PiImagerStep(Step):
                 verbose=True,
             )
         else:
+            stdout_copy = tempfile.NamedTemporaryFile(
+                delete=False, prefix="rpi-imager", dir=str(stdout_copy_folder)
+            )
             self.imager = RpiImager(
                 args=[
                     shutil.which("rpi-imager") or "/bin/false",
@@ -283,7 +299,8 @@ class PiImagerStep(Step):
                     "--debug",
                     str(fpath),
                     str(self.environment.target_disk.path),
-                ]
+                ],
+                copy_stdout_to=Path(stdout_copy.name),
             )
             ps = self.imager
             self.imager.start()
