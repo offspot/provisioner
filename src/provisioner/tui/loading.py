@@ -16,7 +16,6 @@ from provisioner.tui.spinner import SpinnerText
 
 
 class LoadingPane(Pane):
-
     def render(self):
         self.keep_refreshing = False
 
@@ -82,7 +81,7 @@ class LoadingPane(Pane):
         self.show_as_loading()
 
         # start thread gathering infos from host
-        Thread(target=self.gather_infos).start()
+        Thread(target=self.gather_infos, daemon=True).start()
 
     def show_as_loading(self):
         """display the spinner"""
@@ -135,7 +134,7 @@ class LoadingPane(Pane):
         self.show_as_ready(pop_menu=False)
 
         self.keep_refreshing = True
-        Thread(target=self.keep_refreshing_network).start()
+        Thread(target=self.keep_refreshing_network, daemon=True).start()
 
     def do_refresh_network(self):
         self.host.query_network()

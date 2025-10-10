@@ -2,7 +2,9 @@ import asyncio
 import os
 import signal
 import sys
+import threading
 import traceback
+from traceback import print_exception
 from types import FrameType
 
 import urwid as uw
@@ -16,6 +18,32 @@ aio_loop = asyncio.get_event_loop()
 context = Context.get()
 logger = context.logger
 
+
+def threading_excepthook(args, /):
+    """Handle uncaught Thread.run() exception."""
+
+    if sys is not None and sys.stderr is not None:
+        stderr = sys.stderr
+    elif args.thread is not None:
+        stderr = args.thread._stderr
+        if stderr is None:
+            # do nothing if sys.stderr is None and sys.stderr was None
+            # when the thread was created
+            return
+    else:
+        # do nothing if sys.stderr is None and args.thread is None
+        return
+
+    if args.thread is not None:
+        name = args.thread.name
+    else:
+        name = threading.get_ident()
+    print(f"Exception in thread {name}:", file=stderr, flush=True)
+    print_exception(args.exc_type, args.exc_value, args.exc_traceback, file=stderr)
+    stderr.flush()
+
+
+threading.excepthook = threading_excepthook
 
 def _exception_handler(loop, context):  # noqa: ARG001
     try:
@@ -117,13 +145,7 @@ class App:
             if self.pane:
                 self.pane.refresh()
         if key in {"q", "Q"}:
-            self.exit_code = RC_EXIT
-            if self.pane:
-                self.pane.stop()
-            if self.uloop:
-                aio_loop.stop()
-                self.uloop.stop()
-            os.close(self.update_pipe)
+            self.stop(exit_code=RC_EXIT)
         # print(f"Received {key=}", flush=True)
 
     def reset_ui(self):
@@ -163,7 +185,26 @@ class App:
 
     def stop(self, exit_code: int):
         self.exit_code = exit_code
-        self.on_unhandled_input(key="q")
+        # self.on_unhandled_input(key="q")
+        if self.pane:
+            try:
+                self.pane.stop()
+            except Exception:
+                ...
+        if self.uloop:
+            try:
+                aio_loop.stop()
+            except Exception:
+                ...
+            try:
+                self.uloop.stop()
+            except Exception:
+                ...
+        try:
+            os.close(self.update_pipe)
+        except Exception:
+            ...
+        sys.exit(self.exit_code)
 
 
 def main() -> int:
@@ -171,9 +212,9 @@ def main() -> int:
 
     def exit_gracefully(signum: int, frame: FrameType | None):  # noqa: ARG001
         print("\n", flush=True)  # noqa: T201
-        app.stop(exit_code=128 + signum)
         logger.info(f"Received {signal.Signals(signum).name}/{signum}. Exiting")
-        sys.exit(app.exit_code)
+        app.stop(exit_code=128 + signum)
+        sys.exit(app.exit_code)  # shouldn't be necessary
 
     signal.signal(signal.SIGTERM, exit_gracefully)
     signal.signal(signal.SIGINT, exit_gracefully)

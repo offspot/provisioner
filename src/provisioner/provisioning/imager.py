@@ -49,7 +49,7 @@ class RpiImager:
 
         self.master_stdout, self.slave_stdout = pty.openpty()
 
-        self.output_reader = Thread(target=self.consume_pty)
+        self.output_reader = Thread(target=self.consume_pty, daemon=True)
 
         self.stdout_copy: Path | None = copy_stdout_to
 

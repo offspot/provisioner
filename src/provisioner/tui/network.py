@@ -40,7 +40,6 @@ class DoneEdit(uw.Edit):
 
 
 class NetworkPane(Pane):
-
     @property
     def std_option(self):
         return (uw.WHSettings.WEIGHT, 10)
@@ -104,7 +103,7 @@ class NetworkPane(Pane):
         self.update()
 
         # start thread gathering infos from host
-        Thread(target=self.gather_infos).start()
+        Thread(target=self.gather_infos, daemon=True).start()
 
     def get_statuses(self) -> uw.Pile:
         internet = self.host.network.internet
@@ -306,7 +305,9 @@ class NetworkPane(Pane):
         self.loading_text.animate(self.uloop)
         self.update()
         Thread(
-            target=self.connect_to_wifi, kwargs={"password": new_edit_text or ""}
+            target=self.connect_to_wifi,
+            kwargs={"password": new_edit_text or ""},
+            daemon=True,
         ).start()
 
     def connect_to_wifi(self, password: str):
@@ -315,8 +316,7 @@ class NetworkPane(Pane):
         except Exception:
             self.loading_text.done("")
             return self.on_error(
-                f"Failed to connect to {self.network.name}. "
-                "Was the passphrase correct?"
+                f"Failed to connect to {self.network.name}. Was the passphrase correct?"
             )
         else:
             time.sleep(2)

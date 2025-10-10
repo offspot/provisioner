@@ -30,7 +30,6 @@ one_minute = 60
 
 
 class ProvisionPane(Pane):
-
     def render(self):
         self.loading_text = SpinnerText("Gathering information…", align="center")
         self.uloop.widget = uw.AttrMap(uw.SolidFill(), "bg_prov")
@@ -40,9 +39,7 @@ class ProvisionPane(Pane):
         self.render_with_host()
 
     def render_without_host(self):
-        pile: uw.Pile = (
-            self.main_widget.base_widget
-        )  # pyright: ignore reportAssignmentType
+        pile: uw.Pile = self.main_widget.base_widget  # pyright: ignore reportAssignmentType
 
         # paint a text line surrounded by two lines of decor
         div = uw.Divider()
@@ -72,7 +69,7 @@ class ProvisionPane(Pane):
         self.update()
 
         # start thread gathering infos from host
-        Thread(target=self.gather_infos).start()
+        Thread(target=self.gather_infos, daemon=True).start()
 
     def gather_infos(self):
         self.host.query_all()
@@ -85,9 +82,7 @@ class ProvisionPane(Pane):
     def render_with_host(self):
         self.target_disk = self.host.dev.nvme_target_disk
 
-        pile: uw.Pile = (
-            self.main_widget.base_widget
-        )  # pyright: ignore reportAssignmentType
+        pile: uw.Pile = self.main_widget.base_widget  # pyright: ignore reportAssignmentType
 
         # paint a text line surrounded by two lines of decor
         div = uw.Divider()
@@ -95,8 +90,7 @@ class ProvisionPane(Pane):
         inside = uw.AttrMap(div, "inside")
         streak = uw.AttrMap(
             uw.Text(
-                f"{self.host.model}"
-                f" – S/N: {self.host.serial_number.upper()}",  # noqa: RUF001
+                f"{self.host.model} – S/N: {self.host.serial_number.upper()}",  # noqa: RUF001
                 align=uw.Align.CENTER,
             ),
             "streak",
@@ -120,9 +114,7 @@ class ProvisionPane(Pane):
         self.render_image_chooser()
 
     def render_image_chooser(self):
-        pile: uw.Pile = (
-            self.main_widget.base_widget
-        )  # pyright: ignore reportAssignmentType
+        pile: uw.Pile = self.main_widget.base_widget  # pyright: ignore reportAssignmentType
         if self.menu_in_pile:
             self.menu.contents.clear()
             pile.contents.pop()
@@ -185,9 +177,7 @@ class ProvisionPane(Pane):
     ):
         self.image = image
 
-        pile: uw.Pile = (
-            self.main_widget.base_widget
-        )  # pyright: ignore reportAssignmentType
+        pile: uw.Pile = self.main_widget.base_widget  # pyright: ignore reportAssignmentType
         if self.menu_in_pile:
             self.menu.contents.clear()
             pile.contents.pop()
@@ -323,7 +313,7 @@ class ProvisionPane(Pane):
         )
         self.progressbar.set_completion(0)
 
-        Thread(target=self.do_provision).start()
+        Thread(target=self.do_provision, daemon=True).start()
 
         self.update()
 
@@ -373,6 +363,7 @@ class ProvisionPane(Pane):
                         Thread(
                             target=update_pg,
                             kwargs={"pg": self.progressbar, "step": step},
+                            daemon=True,
                         ).start()
                     res = step.run(verbose=False)
                     step.running = False
