@@ -6,8 +6,8 @@ import re
 import select
 import shutil
 import subprocess
-import tempfile
 import time
+import uuid
 from pathlib import Path
 from threading import Thread
 
@@ -288,9 +288,6 @@ class PiImagerStep(Step):
                 verbose=True,
             )
         else:
-            stdout_copy = tempfile.NamedTemporaryFile(
-                delete=False, prefix="rpi-imager", dir=str(stdout_copy_folder)
-            )
             self.imager = RpiImager(
                 args=[
                     shutil.which("rpi-imager") or "/bin/false",
@@ -300,7 +297,9 @@ class PiImagerStep(Step):
                     str(fpath),
                     str(self.environment.target_disk.path),
                 ],
-                copy_stdout_to=Path(stdout_copy.name),
+                copy_stdout_to=stdout_copy_folder.joinpath(
+                    f"rpi-imager_{uuid.uuid4().hex}.txt"
+                ),
             )
             ps = self.imager
             self.imager.start()
