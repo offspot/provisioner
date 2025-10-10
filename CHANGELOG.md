@@ -12,10 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - BOOT_ORDER line in EEPROM config was not replaced but duplicated (#41)
 - Prevented a race condition showing error message when choosing provisioning
 - Possible Crash on shutdown request (#39)
+- `master_fs` file was not removed from `/data` (#43)
 
 ### Changed
 
 - No more gathering at start of Provision: was if last gathering older than 1mn (#38)
+- No more `init=` in cmdline so no more next boot to script (#43)
 
 ### Added
 

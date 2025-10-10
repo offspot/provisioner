@@ -11,14 +11,12 @@ uncorrected_errors_rc = 4
 
 
 class ResizePartitionStep(Step):
-
     ident: str = "resize-data"
     name: str = "Resize Hotspot's third partition"
     reports_progress: bool = False
     progress_interval_ms: int = 1000
 
     def run(self, *, verbose: bool = False) -> StepResult:
-
         root_dev = self.environment.target_disk.path  # /dev/nvme0n1
         boot_part_dev = root_dev.with_name(f"{root_dev.name}p1")  # /dev/nvme0n1p1
         root_part_dev = root_dev.with_name(f"{root_dev.name}p2")  # /dev/nvme0n1p2
@@ -180,7 +178,24 @@ class ResizePartitionStep(Step):
         mountpoint = mount_to_temp(boot_part_dev, rw=True)
         try:
             cmdline = mountpoint.joinpath("cmdline.txt")
-            cmdline.write_text(cmdline.read_text().replace(old_disk_id, new_disk_id))
+            cmdline.write_text(
+                cmdline.read_text()
+                .replace(old_disk_id, new_disk_id)
+                .replace(" quiet init=/usr/sbin/offspot_bi_init_resize.sh", "")
+            )
+            os.sync()
+        finally:
+            unmount(mountpoint)
+            try:
+                mountpoint.rmdir()
+            except Exception:
+                ...
+
+        # mount data
+        mountpoint = mount_to_temp(data_part_dev, rw=True)
+        try:
+            master_fs = mountpoint.joinpath("master_fs")
+            master_fs.unlink(missing_ok=True)
             os.sync()
         finally:
             unmount(mountpoint)
