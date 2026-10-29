@@ -15,6 +15,7 @@ logger = context.logger
 class DeviceType(enum.StrEnum):
     disk = "disk"
     part = "part"
+    loop = "loop"
 
 
 @define(kw_only=True)

@@ -1,5 +1,6 @@
 import json
 import subprocess
+import time
 from pathlib import Path
 
 from provisioner.context import Context
@@ -44,13 +45,19 @@ def get_loop_name(loop_dev: str) -> str:
 def create_block_special_device(dev_path: str, major: int, minor: int):
     """create a special block device (for partitions, inside docker)"""
     logger.debug(f"Create mknod for {dev_path} with {major=} {minor=}")
-    subprocess.run(
+    mknod = subprocess.run(
         ["/usr/bin/env", "mknod", dev_path, "b", str(major), str(minor)],
-        check=True,
-        capture_output=only_on_debug,
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
         text=True,
         env=get_environ(),
     )
+    # consider success if errors as already existing
+    if mknod.returncode == 1 and (mknod.stdout or "").strip().endswith(": File exists"):
+        return
+    print(mknod.stdout)
+    mknod.check_returncode()
 
 
 def attach_to_device(img_fpath: Path, loop_dev: str):
@@ -62,6 +69,7 @@ def attach_to_device(img_fpath: Path, loop_dev: str):
         text=True,
         env=get_environ(),
     )
+    time.sleep(0.5)
 
     # create nodes for partitions if not present (typically when run in docker)
     if not Path(f"{loop_dev}p1").exists():
