@@ -42,7 +42,7 @@ class DockerStep(Step):
     This requires mounting both the target system partition
     and the target data partition on which the tar images are stored
 
-    It also requires running the balena engine serice inside the chroot
+    It also requires running the balena engine service inside the chroot
     with cgroupsv1 properly setup
 
     Then the docker-images-loader.py script can be run in the chroot

@@ -6,27 +6,28 @@ build-backend = "hatchling.build"
 name = "provisioner"
 description = "Kiwix Hotspot Provisioner"
 readme = "README.md"
-requires-python = ">=3.11"
+# we use it on trixie
+requires-python = ">=3.13"
 dependencies = [
-    "attrs==25.3.0",
+    "attrs==26.1.0",
     "orjson>=3.10.18",
     "pyreadpartitions>=1.1.1",
     "urwid>=3.0.2",
     "humanfriendly==10.0",
     "types-humanfriendly==10.0.1.20250319",
-    "prettytable==3.16.0",
+    "prettytable==3.18.0",
     "netifaces==0.11.0",
-    "nmcli==1.5.0",
-    "babel==2.17.0",
-    "python-dateutil==2.9.0.post0",
-    "click==8.2.1",
+    "nmcli==1.8.0",
+    "babel==2.18.0",
+    "python-dateutil==3.0.0",
+    "click==8.5.0",
     "questionary==2.1.1",
-    "requests==2.32.4",
-    "pycountry==24.6.1",
+    "requests==2.34.2",
+    "pycountry==26.2.16",
     "pyparted==3.13.0 ; platform_system == 'Linux'",
     "halo==0.0.31",
-    "tzdata==2025.2",
-    "pyyaml==6.0.2",
+    "tzdata==2026.6",
+    "pyyaml==6.0.3",
     "ipython",
     "ipdb"
 ]
