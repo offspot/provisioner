@@ -62,6 +62,7 @@ provisioner-ui = "provisioner.entrypoints.tui:entrypoint"
 provisioner-status = "provisioner.entrypoints.status:main"
 provisioner-advanced = "provisioner.entrypoints.advanced:main"
 provisioner-manual = "provisioner.entrypoints.manualprov:main"
+provisioner-reset = "provisioner.entrypoints.reset:main"
 
 [tool.hatch.version]
 path = "src/provisioner/__about__.py"
