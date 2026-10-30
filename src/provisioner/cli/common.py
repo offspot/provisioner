@@ -21,19 +21,19 @@ def greet_for(name: str):
 
 
 def success_text(text: str):
-    return click.style(text, fg="green", bg="")
+    return click.style(text, fg="green", bg=None)
 
 
 def error_text(text: str):
-    return click.style(text, fg="red", bg="")
+    return click.style(text, fg="red", bg=None)
 
 
 def warning_text(text: str):
-    return click.style(text, fg="yellow", bg="")
+    return click.style(text, fg="yellow", bg=None)
 
 
 def regular_text(text: str):
-    return click.style(text, fg="", bg="")
+    return click.style(text, fg=None, bg=None)
 
 
 def refresh(host: ProvisionHost):
