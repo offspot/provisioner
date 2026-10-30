@@ -123,8 +123,14 @@ def main(host: ProvisionHost, *, show_paths: bool = False) -> CliResult:
     table.header = False
     table.add_row(["Host Hardware", click.style(host.model, bold=True)])
     table.add_row(["Host S/N", host.serial_number.upper()])
+    bootloader_decor = regular_text
+    if not host._bootloader_version:
+        bootloader_decor = error_text
+    elif not host.bootloader_version.matches_latest:
+        bootloader_decor = warning_text
+    table.add_row(["Host Firmware", bootloader_decor(str(host.bootloader_version))])
     boot_order_decor = regular_text
-    if not host.boot_order:
+    if not host._boot_order:
         boot_order_decor = error_text
     elif host.boot_order.first != BootValue.NVME:
         boot_order_decor = warning_text

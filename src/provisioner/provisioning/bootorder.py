@@ -7,9 +7,8 @@ logger = context.logger
 
 
 class BootOrderStep(Step):
-
     ident: str = "boot"
-    name: str = "Change BOOT_ORDER and HDMI_DELAY"
+    name: str = "Change BOOT_ORDER, HDMI_DELAY and update Firmware"
     reports_progress: bool = False
     progress_interval_ms: int = 1000
 

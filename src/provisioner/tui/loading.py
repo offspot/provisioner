@@ -139,6 +139,7 @@ class LoadingPane(Pane):
     def do_refresh_network(self):
         self.host.query_network()
         self.host.query_hwclock()
+        self.host.query_eeprom()
 
     def keep_refreshing_network(self):
         sleep_interval = 0.2

@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from abc import abstractmethod
 from typing import Protocol
 
@@ -11,8 +11,8 @@ from provisioner.utils.imgprobe import ImageFileInfo
 
 @define
 class ImagerStats:
-    started_on: datetime.datetime
-    ended_on: datetime.datetime
+    started_on: dt.datetime
+    ended_on: dt.datetime
     preparing_done: bool = False
     write_progress: int = 0
     write_done: bool = False
@@ -54,7 +54,6 @@ class ImplementsProgress(Protocol):
 
 @define
 class Step:
-
     ident: str = ""
     name: str = ""
     reports_progress: bool = False
