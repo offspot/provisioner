@@ -4,6 +4,7 @@ from typing import Any
 import click
 from prettytable import PrettyTable, TableStyle
 
+from provisioner.__about__ import get_provos_version, get_version
 from provisioner.cli.common import (
     CliResult,
     error_text,
@@ -111,7 +112,7 @@ def get_target_disk_cell(
     value = f"{devmgmt.target_disk!s}"
     if show_paths:
         value += f" [{devmgmt.target_disk.path}]"
-    value += f" (+{len(devmgmt.target_disks) -1} other)"
+    value += f" (+{len(devmgmt.target_disks) - 1} other)"
     return value
 
 
@@ -165,6 +166,12 @@ def main(host: ProvisionHost, *, show_paths: bool = False) -> CliResult:
         ]
     )
     table.add_divider()
+    table.add_row(
+        [
+            "Provisioner Version",
+            click.style(f"{get_version()} / OS: {get_provos_version()}"),
+        ]
+    )
     provision_disk_str = str(host.dev.provisionos_disk)
     if host.dev.provisionos_disk and show_paths:
         provision_disk_str += f" [{host.dev.provisionos_disk.path}]"
