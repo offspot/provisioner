@@ -85,7 +85,9 @@ class ProvisionHost:
         self.clock.query()
         # in case we are not NTP-synced and we are network-connected
         # re-request NTP sync
-        if not self.clock.tdctl.ntp_synced and (self.network and self.network.all_good):
+        if (self.clock.tdctl and not self.clock.tdctl.ntp_synced) and (
+            self.network and self.network.all_good
+        ):
             self.clock.requery()
 
     @property
