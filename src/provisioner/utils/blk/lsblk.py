@@ -101,20 +101,23 @@ def get_devices_from_lsblk_json(text: str) -> list[Device]:
 
 
 def get_devices() -> list[Device]:
-    ps = subprocess.run(
-        ["/usr/bin/lsblk", "--json", "--bytes", "--output-all"],
-        capture_output=True,
-        text=True,
-        check=False,
-        timeout=10,
-    )
-    if ps.returncode:
-        logger.error(f"lsblk returned {ps.returncode}")
-        logger.debug(ps.stdout)
-        return []
+    if context.fake_pi:
+        json_text = (Path.cwd() / "lsblk.json").read_text()
+    else:
+        ps = subprocess.run(
+            ["/usr/bin/lsblk", "--json", "--bytes", "--output-all"],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=10,
+        )
+        if ps.returncode:
+            logger.error(f"lsblk returned {ps.returncode}")
+            logger.debug(ps.stdout)
+            return []
+        json_text = ps.stdout.strip()
     try:
-        # pp(ps.stdout.strip())
-        return get_devices_from_lsblk_json(ps.stdout.strip())
+        return get_devices_from_lsblk_json(json_text)
     except Exception as exc:
         logger.error(f"Failed to parse lsblk's output: {exc}")
         logger.exception(exc)
@@ -129,8 +132,6 @@ def get_disks_from_devices(devices: list[Device]) -> dict[str, Disk]:
             logger.debug(f"Excluding device {device.name} as is zero size")
             continue
         if device.type == DeviceType.disk:
-
-            # pdb.set_trace()
             disks[device.name] = Disk(**asdict(device))
             continue
         elif device.type == DeviceType.part:

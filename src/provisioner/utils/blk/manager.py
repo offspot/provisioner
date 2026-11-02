@@ -114,6 +114,9 @@ class BlockDevicesManager:
         return list(source_disks)
 
     def get_images(self) -> tuple[list[ImageFileInfo], list[ExcludedImage]]:
+        if context.fake_pi:
+            return [], []
+        
         images: list[ImageFileInfo] = []
 
         # build list of to-consider devices: exfat disk or partitions
