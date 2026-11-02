@@ -1,3 +1,5 @@
+from provisioner.__about__ import get_provos_version, get_version
+
 NAME = "kiwix-provisioner"  # must be filesystem-friendly (technical)
 NAME_CLI = "provisioner"
 NAME_HUMAN = "Hotspot Provisioner"
@@ -104,7 +106,7 @@ BOOT_ORDER = ["NVME", "USB_MSD", "SD_CARD", "HTTP", "RESTART"]
 
 RTC_CHARGING_VOLTAGE = 3.0
 
-ASCII_LOGO = r"""
+ASCII_LOGO = rf"""
  ▄         ▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄ 
 ▐░▌       ▐░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌
 ▐░▌       ▐░▌▐░█▀▀▀▀▀▀▀█░▌ ▀▀▀▀█░█▀▀▀▀ ▐░█▀▀▀▀▀▀▀▀▀ ▐░█▀▀▀▀▀▀▀█░▌▐░█▀▀▀▀▀▀▀█░▌ ▀▀▀▀█░█▀▀▀▀ 
@@ -116,7 +118,8 @@ ASCII_LOGO = r"""
 ▐░▌       ▐░▌▐░█▄▄▄▄▄▄▄█░▌     ▐░▌      ▄▄▄▄▄▄▄▄▄█░▌▐░▌          ▐░█▄▄▄▄▄▄▄█░▌     ▐░▌     
 ▐░▌       ▐░▌▐░░░░░░░░░░░▌     ▐░▌     ▐░░░░░░░░░░░▌▐░▌          ▐░░░░░░░░░░░▌     ▐░▌     
  ▀         ▀  ▀▀▀▀▀▀▀▀▀▀▀       ▀       ▀▀▀▀▀▀▀▀▀▀▀  ▀            ▀▀▀▀▀▀▀▀▀▀▀       ▀      
-""".strip("\n")
+
+v{get_version()} / OS: {get_provos_version()}""".strip("\n")
 
 USB_BUS_SPEED_PER_SECOND = "375MiB"
 
