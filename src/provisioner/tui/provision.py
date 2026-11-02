@@ -347,6 +347,7 @@ class ProvisionPane(Pane):
                         f"{step.prefix} {step.name}: {progress_text}"
                     )
                 time.sleep(step.progress_interval_ms / 1000)
+                self.update()
 
         failed = False
         advice = ""
@@ -355,6 +356,7 @@ class ProvisionPane(Pane):
         with manager as runner:
             for self.current_step in runner:
                 step = self.current_step
+                self.update()
                 try:
                     self.spinner.set_message(f"{step.prefix} {step.name}")
                     self.spinner.animate(self.uloop)
@@ -395,6 +397,7 @@ class ProvisionPane(Pane):
                     self.ended_on = get_now()
                     break
             self.current_step = None
+        self.update()
         self.ended_on_text.set_text(
             f"{padding('Ended on', 10, on_end=True)}: {format_dt(self.ended_on)}"
         )
