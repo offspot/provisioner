@@ -105,7 +105,10 @@ class ProvisionHost:
         if not self.dev.has_at_least_one_image:
             if not self.dev.source_disks:
                 return False, "No source image disk present"
-            return False, "No image found"
+            return (
+                False,
+                f"No image found ({len(self.dev.excluded_images)} excluded .img files)",
+            )
         if not self.network.internet.https:
             return False, "No Internet connection"
         if self.network.is_not_connected:

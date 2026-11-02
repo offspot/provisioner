@@ -16,7 +16,7 @@ from provisioner.cli.common import (
 from provisioner.constants import WL_IFACE
 from provisioner.context import Context
 from provisioner.host import ProvisionHost
-from provisioner.utils.blk.manager import BlockDevicesManager
+from provisioner.utils.blk.manager import BlockDevicesManager, ExcludedImageReason
 from provisioner.utils.misc import format_dt, format_size, padding, yesno
 from provisioner.utils.network import Interface, InternetCheckResult
 from provisioner.utils.raspberry import BootValue
@@ -94,6 +94,35 @@ def get_images_cell(devmgmt: BlockDevicesManager, *, show_paths: bool = False) -
             f"{padding(format_size(image.size, binary=False), 10)} "
             f"{padding(image.human, 45, on_end=True)} {path_or_name}"
         )
+    return "\n".join(rows)
+
+
+def get_excluded_cell(devmgmt: BlockDevicesManager, *, show_paths: bool = False) -> str:
+    rows: list[str] = []
+    nb_imgs = len(devmgmt.excluded_images)
+    total_size = sum([image.size for image in devmgmt.excluded_images])
+    nb_disks = len({image.device for image in devmgmt.excluded_images})
+    if nb_imgs:
+        rows.append(
+            f"{nb_imgs} files, totaling {format_size(total_size, binary=False)} "
+            f"on {nb_disks} disks"
+        )
+    else:
+        rows.append("None")
+
+    longest_reson = max(
+        len(text)
+        for text in [
+            str(value) for value in list(ExcludedImageReason.__members__.values())
+        ]
+    )
+    for image in devmgmt.excluded_images:
+        path_or_name = (
+            f"[/dev/{image.device}:/{image.path}]"
+            if show_paths
+            else f"{devmgmt.get_disk_from_name(image.device)!r} "
+        )
+        rows.append(f"{padding(image.reason.value, longest_reson)} {path_or_name}")
     return "\n".join(rows)
 
 
@@ -181,6 +210,9 @@ def main(host: ProvisionHost, *, show_paths: bool = False) -> CliResult:
         ["Target Disk", get_target_disk_cell(host.dev, show_paths=show_paths)]
     )
     table.add_row(["Images Founds", get_images_cell(host.dev, show_paths=show_paths)])
+    table.add_row(
+        ["Excluded .img files", get_excluded_cell(host.dev, show_paths=show_paths)]
+    )
     click.echo(table.get_string())  # pyright: ignore[reportUnknownMemberType]
 
     return CliResult(

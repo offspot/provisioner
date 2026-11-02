@@ -133,6 +133,8 @@ class ProvisionPane(Pane):
         title_text = "Select source Image"
         if nb_filtered_out_images:
             title_text += f" ({nb_filtered_out_images} excluded as too large for disk)"
+        if self.host.dev.excluded_images:
+            title_text += f" ({len(self.host.dev.excluded_images)} excluded .img files)"
         self.append_to(
             self.menu,
             uw.AttrMap(

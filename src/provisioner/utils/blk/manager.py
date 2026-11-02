@@ -1,3 +1,4 @@
+import enum
 import os
 import re
 from pathlib import Path
@@ -29,6 +30,19 @@ class ImageLocation(NamedTuple):
         return re.sub(r"^.$", "", str(self.path)) + os.sep
 
 
+class ExcludedImageReason(enum.StrEnum):
+    folder = "Inside “ignored” folder"
+    small = "Size is too small"
+    read_failed = "Failed to read as Image"
+
+
+class ExcludedImage(NamedTuple):
+    device: str  # device name (sda1)
+    path: Path  # folder path relative to device root
+    size: int  # size of file
+    reason: ExcludedImageReason  # why its been excluded
+
+
 class BlockDevicesManager:
     disks: dict[str, Disk]
     images: list[ImageFileInfo]
@@ -37,6 +51,7 @@ class BlockDevicesManager:
 
         self.disks: dict[str, Disk] = {}
         self.images: list[ImageFileInfo] = []
+        self.excluded_images: list[ExcludedImage] = []
 
     @property
     def has_single_target(self) -> bool:
@@ -56,7 +71,7 @@ class BlockDevicesManager:
 
     def query(self):
         self.disks = get_disks_from_devices(get_devices())
-        self.images = self.get_images()
+        self.images, self.excluded_images = self.get_images()
 
     def get_disk_from_path(self, path: Path) -> Device:
         for disk in self.disks.values():
@@ -98,7 +113,7 @@ class BlockDevicesManager:
 
         return list(source_disks)
 
-    def get_images(self) -> list[ImageFileInfo]:
+    def get_images(self) -> tuple[list[ImageFileInfo], list[ExcludedImage]]:
         images: list[ImageFileInfo] = []
 
         # build list of to-consider devices: exfat disk or partitions
@@ -127,8 +142,27 @@ class BlockDevicesManager:
 
             # find all *.img files within mountpoint
             # exclude files that are too small
+            excluded_images: list[ExcludedImage] = []
             for fpath in mountpoint.rglob("*.img"):
+                if fpath.is_relative_to(mountpoint.joinpath("ignored")):
+                    excluded_images.append(
+                        ExcludedImage(
+                            device=device.name,
+                            path=fpath.relative_to(mountpoint),
+                            size=fpath.stat().st_size,
+                            reason=ExcludedImageReason.folder,
+                        )
+                    )
+                    continue
                 if fpath.stat().st_size < context.min_img_size:
+                    excluded_images.append(
+                        ExcludedImage(
+                            device=device.name,
+                            path=fpath.relative_to(mountpoint),
+                            size=fpath.stat().st_size,
+                            reason=ExcludedImageReason.small,
+                        )
+                    )
                     continue
 
                 try:
@@ -140,6 +174,14 @@ class BlockDevicesManager:
                 except Exception as exc:
                     logger.error(f"Failed to read {fpath}: {exc}")
                     logger.exception(exc)
+                    excluded_images.append(
+                        ExcludedImage(
+                            device=device.name,
+                            path=fpath.relative_to(mountpoint),
+                            size=fpath.stat().st_size,
+                            reason=ExcludedImageReason.read_failed,
+                        )
+                    )
                     continue
                 else:
                     if img_info.is_compatible:
@@ -211,7 +253,7 @@ class BlockDevicesManager:
                     return True
                 return not self.__eq__(other)
 
-        return sorted(images, key=ImageUsefulness)
+        return sorted(images, key=ImageUsefulness), excluded_images
 
     @property
     def target_disks(self) -> list[Disk]:
