@@ -22,7 +22,7 @@ class LoadingPane(Pane):
         self.loading_text = SpinnerText("Gathering information…", align="center")
 
         # paint solid background with vertical stack
-        self.main_widget = uw.Filler(uw.Pile([], focus_item=1), valign="top")
+        self.main_widget = uw.Filler(uw.Pile([], focus_item=None), valign="top")
         pile = self.pile
 
         # paint logo with padding
@@ -63,14 +63,16 @@ class LoadingPane(Pane):
                 ("weight", 25, BoxButton("Advanced mode", self.on_advanced_selected)),
             ]
         )
+        self.menu.focus_position = 0
         self.append_to(pile, self.menu)
-        pile.focus_item = self.menu
+        pile.focus_position = len(pile.contents) - 1
 
         self.status = "init"
 
         self.refresh()
 
     def refresh(self, *args):  # noqa: ARG002
+        self.update()
         if self.status == "gathering":
             return
         # remove menu if present
@@ -126,6 +128,7 @@ class LoadingPane(Pane):
             ),
         )
         self.menu.focus_col = 0
+        self.menu.focus_position = 0
         self.update()
         self.status = "ready"
 
