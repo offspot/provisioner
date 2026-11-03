@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import math
 import os
 import shlex
@@ -39,7 +39,7 @@ def yesno(value: Any) -> str:
 
 
 def format_dt(
-    dt: datetime.datetime, fmt: str = "long", locale: str | None = None
+    dt: dt.datetime, fmt: str = "long", locale: str | None = None
 ) -> str:
     """formatted datetime"""
     return format_datetime(dt, fmt, locale=locale or "en_US.UTF-8")
@@ -89,9 +89,9 @@ def get_environ() -> dict[str, str]:
     return environ
 
 
-def get_now() -> datetime.datetime:
+def get_now() -> dt.datetime:
     """current UTC datetime"""
-    return datetime.datetime.now(tz=datetime.UTC)
+    return dt.datetime.now(tz=dt.UTC)
 
 
 def run_step_command(

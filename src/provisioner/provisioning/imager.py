@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import errno
 import os
 import pty
@@ -30,8 +30,8 @@ class RpiImager:
     def __init__(self, args: list[str], copy_stdout_to: Path | None = None) -> None:
         self.args = args
 
-        self.started_on: datetime.datetime = datetime.datetime.now(tz=datetime.UTC)
-        self.ended_on: datetime.datetime | None = None
+        self.started_on: dt.datetime = dt.datetime.now(tz=dt.UTC)
+        self.ended_on: dt.datetime | None = None
 
         self.img_hash: str = ""
         self.verify_hash: str = ""
@@ -122,7 +122,7 @@ class RpiImager:
         if self.completed:
             logger.debug("UPDATE found ps ended")
             if not self.ended_on:
-                self.ended_on = datetime.datetime.now(tz=datetime.UTC)
+                self.ended_on = dt.datetime.now(tz=dt.UTC)
             try:
                 os.close(self.master_stdout)
             except Exception as exc:
@@ -140,7 +140,7 @@ class RpiImager:
     @property
     def duration(self) -> int:
         if not self.ended_on:
-            self.ended_on = datetime.datetime.now(tz=datetime.UTC)
+            self.ended_on = dt.datetime.now(tz=dt.UTC)
         return int((self.ended_on - self.started_on).total_seconds())
 
     @property
@@ -171,7 +171,7 @@ class RpiImager:
         if self.completed:
             self.parse()
             if not self.ended_on:
-                self.ended_on = datetime.datetime.now(tz=datetime.UTC)
+                self.ended_on = dt.datetime.now(tz=dt.UTC)
             return True
         return False
 

@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from collections.abc import Generator
 
 from provisioner.context import Context
@@ -35,8 +35,8 @@ class ProvisionManager:
 
         self.steps: dict[str, Step] = {}
         self.step_index = -1
-        self.started_on: datetime.datetime | None = None
-        self.ended_on: datetime.datetime | None = None
+        self.started_on: dt.datetime | None = None
+        self.ended_on: dt.datetime | None = None
 
     def get_step(self, ident: str) -> Step:
         if ident in self.steps:
@@ -67,11 +67,11 @@ class ProvisionManager:
 
     def start(self):
         if self.started_on is None:
-            self.started_on = datetime.datetime.now(tz=datetime.UTC)
+            self.started_on = dt.datetime.now(tz=dt.UTC)
 
     def end(self):
         if self.ended_on is None:
-            self.ended_on = datetime.datetime.now(tz=datetime.UTC)
+            self.ended_on = dt.datetime.now(tz=dt.UTC)
 
     @property
     def duration(self) -> float:

@@ -288,8 +288,8 @@ class ProvisionPane(Pane):
         self.menu.contents.pop()
         self.menu.contents.pop()
 
-        self.started_on = datetime.datetime.now(tz=datetime.UTC)
-        self.eta_on = self.started_on + datetime.timedelta(
+        self.started_on = dt.datetime.now(tz=dt.UTC)
+        self.eta_on = self.started_on + dt.timedelta(
             seconds=self.exptected_duration
         )
 

@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import os
 import subprocess
 import time
@@ -14,8 +14,8 @@ from provisioner.utils.misc import run_command
 context = Context.get()
 
 # build list of timezone abbrevations
-std = datetime.datetime(2024, 1, 1)  # noqa: DTZ001
-dst = datetime.datetime(2024, 6, 1)  # noqa: DTZ001
+std = dt.datetime(2024, 1, 1)  # noqa: DTZ001
+dst = dt.datetime(2024, 6, 1)  # noqa: DTZ001
 tz_map = {}
 for zone in zoneinfo.available_timezones():
     tz = zoneinfo.ZoneInfo(zone)
@@ -38,9 +38,9 @@ class TimedatectlData:
     can_ntp: bool
     ntp_enabled: bool
     ntp_synced: bool
-    local_time: datetime.datetime
+    local_time: dt.datetime
     has_rtc: bool
-    rtc_time: datetime.datetime
+    rtc_time: dt.datetime
 
     def __init__(self, *, retcode: int, output: str):
         self.retcode = retcode
@@ -90,7 +90,7 @@ class TimedatectlData:
         )
 
     def parse(self):
-        def parse_date(text: str) -> datetime.datetime:
+        def parse_date(text: str) -> dt.datetime:
             return dateutil.parser.parse(text, tzinfos=tz_map, fuzzy=True)
 
         def parse_tz(text: str) -> zoneinfo.ZoneInfo:
@@ -117,14 +117,14 @@ class TimedatectlData:
         return self.retcode != 0
 
     @property
-    def rtc_utc_time(self) -> datetime.datetime:
+    def rtc_utc_time(self) -> dt.datetime:
         if not self.has_rtc:
             raise OSError("No RTC detected")
-        return self.rtc_time.astimezone(datetime.UTC)
+        return self.rtc_time.astimezone(dt.UTC)
 
     @property
-    def utc_time(self) -> datetime.datetime:
-        return self.local_time.astimezone(datetime.UTC)
+    def utc_time(self) -> dt.datetime:
+        return self.local_time.astimezone(dt.UTC)
 
     @property
     def sys_and_rtc_synced(self) -> bool:

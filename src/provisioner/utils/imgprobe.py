@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import os
 import re
 from pathlib import Path
@@ -261,8 +261,8 @@ def get_linux_info(mountpoints: list[Path]) -> SystemDetails:
                 return SystemDetails(
                     is_linux=True,
                     release="Kiwix Hotspot",
-                    version=datetime.datetime.fromtimestamp(
-                        offspot_base.stat().st_ctime, tz=datetime.UTC
+                    version=dt.datetime.fromtimestamp(
+                        offspot_base.stat().st_ctime, tz=dt.UTC
                     ).strftime("%Y-%m"),
                     variant="Unknown",
                     human=None,

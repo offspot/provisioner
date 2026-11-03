@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 import humanfriendly
 
@@ -32,10 +32,9 @@ def test_yesno():
 
 
 def test_format_dt():
-    dt = datetime.datetime(2025, 1, 1, 0, 0)  # noqa: DTZ001
+    adt = dt.datetime(2025, 1, 1, 0, 0)  # noqa: DTZ001
     assert (
-        format_dt(dt, fmt="long", locale="en")
-        == "January 1, 2025, 12:00:00 AM UTC"  # noqa: RUF001
+        format_dt(adt, fmt="long", locale="en") == "January 1, 2025, 12:00:00 AM UTC"  # noqa: RUF001
     )
 
 
@@ -45,9 +44,9 @@ def test_get_estimated_duration():
 
 
 def test_get_now():
-    dt = get_now()
-    assert isinstance(dt, datetime.datetime)
-    assert dt.tzinfo == datetime.UTC
+    adt = get_now()
+    assert isinstance(adt, dt.datetime)
+    assert adt.tzinfo == dt.UTC
 
 
 def test_get_environ():
