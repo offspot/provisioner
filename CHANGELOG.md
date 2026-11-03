@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-11-03
+
+## Added
+
+- `provisioner-reset` script. useful for testing (unmounts/detach everything)
+- EEPROM firmware now updated in EEPROM step (uses apt update).
+  Update is performed live (not at next reboot)
+- Provisioner version now displayed
+- Placing .img files in root `ignored/` folder of the disk ignores them (faster loading)
+
+## Changed
+
+- Assumes running on debian 13 with Python 3.13
+- Assumes rpi-imager 2+
+- HDMI_DELAY set to 0: more convenient
+- Ignored images are now reported
+
 ## [1.0.2] - 2025-10-10
 
 ### Fixed
