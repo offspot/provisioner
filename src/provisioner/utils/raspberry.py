@@ -253,11 +253,12 @@ def get_bootloader_version(*, is_connected: bool) -> BootloaderVersion:
 
     with tempfile.NamedTemporaryFile("w", suffix=".json", delete=True) as fh:
         ps = run_command(["rpi-eeprom-update", "-j", "-m", fh.name])
-        if ps.returncode != 0:
-            raise OSError("rpi-eeprom-update failed")
+        # returns 1 on new update available
+        if ps.returncode not in (0, 1):
+            raise OSError(f"rpi-eeprom-update failed: rc={ps.returncode}")
         payload = orjson.loads(Path(fh.name).read_text())
 
-    if payload.get("EXITCODE") != "EXIT_SUCCESS":
+    if payload.get("EXITCODE") not in ("EXIT_SUCCESS", "EXIT_UPDATE_REQUIRED"):
         raise OSError(f"rpi-eeprom-update failed: {payload.get('EXITCODE')}")
 
     return BootloaderVersion.using(payload, connected=is_connected)

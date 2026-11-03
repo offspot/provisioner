@@ -76,7 +76,7 @@ class ProvisionHost:
                 is_connected=self.network.all_good
             )
         except Exception as exc:
-            logger.debug("Failed to read bootloader_version: {exc}")
+            logger.debug(f"Failed to read bootloader_version: {exc}")
             logger.exception(exc)
             self._bootloader_version = None
 
