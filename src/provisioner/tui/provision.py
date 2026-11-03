@@ -1,11 +1,11 @@
-import datetime
+import datetime as dt
 import functools
 import time
 from threading import Thread
 
 import urwid as uw
 
-from provisioner.__about__ import get_provos_version, get_version
+from provisioner.__about__ import get_both_versions
 from provisioner.constants import FAILURE_SOUNDS, RC_HALT, RC_REBOOT, SUCCESS_SOUNDS
 from provisioner.context import Context
 from provisioner.provisioning.common import Environment, ImagerStats, Step
@@ -92,7 +92,7 @@ class ProvisionPane(Pane):
         streak = uw.AttrMap(
             uw.Text(
                 f"{self.host.model} – S/N: {self.host.serial_number.upper()} – "  # noqa: RUF001
-                f"v{get_version()} / OS: {get_provos_version()}",
+                f"{get_both_versions()}",
                 align=uw.Align.CENTER,
             ),
             "streak",

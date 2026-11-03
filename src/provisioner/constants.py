@@ -1,4 +1,4 @@
-from provisioner.__about__ import get_provos_version, get_version
+from provisioner.__about__ import get_both_versions
 
 NAME = "kiwix-provisioner"  # must be filesystem-friendly (technical)
 NAME_CLI = "provisioner"
@@ -119,7 +119,7 @@ ASCII_LOGO = rf"""
 ▐░▌       ▐░▌▐░░░░░░░░░░░▌     ▐░▌     ▐░░░░░░░░░░░▌▐░▌          ▐░░░░░░░░░░░▌     ▐░▌     
  ▀         ▀  ▀▀▀▀▀▀▀▀▀▀▀       ▀       ▀▀▀▀▀▀▀▀▀▀▀  ▀            ▀▀▀▀▀▀▀▀▀▀▀       ▀      
 
-v{get_version()} / OS: {get_provos_version()}""".strip("\n")
+{get_both_versions()}""".strip("\n")
 
 USB_BUS_SPEED_PER_SECOND = "375MiB"
 
