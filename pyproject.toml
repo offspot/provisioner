@@ -35,17 +35,17 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 scripts = [
-  "invoke==2.2.0",
+  "invoke==3.0.3",
 ]
 lint = [
-  "ruff==0.14.0",
+  "ruff==0.17.3",
 ]
 check = [
-  "pyright==1.1.406",
+  "pyright==1.1.414",
 ]
 test = [
-  "pytest==8.4.1",
-  "coverage==7.9.1",
+  "pytest==9.2.0",
+  "coverage==7.17.0",
 ]
 dev = [
   "pre-commit==4.2.0",
@@ -208,6 +208,7 @@ ban-relative-imports = "all"
 "tests/**/*" = ["PLR2004", "S101", "TID252"]
 # LOGO in constants have non-break space, long lines and trailing spaces
 "constants.py" = ["RUF001", "E501", "W291"]
+"reset.py" = ["T201"]
 
 [tool.pytest.ini_options]
 minversion = "7.3"
