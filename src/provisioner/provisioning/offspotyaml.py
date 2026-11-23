@@ -10,7 +10,6 @@ logger = context.logger
 
 
 class OffspotYAMLStep(Step):
-
     ident: str = "offspot"
     name: str = "Update offspot.yaml for runtime configuration"
     reports_progress: bool = False
@@ -24,7 +23,8 @@ class OffspotYAMLStep(Step):
             offspot_yaml = mountpoint.joinpath("offspot.yaml")
             config = yaml_load(offspot_yaml.read_text())
 
-            # ADD runtime update HERE
+            config["capabilities"] = config.get("capabilities", {})
+            config["capabilities"].update({"change_bootorder": True})
 
             offspot_yaml.write_text(yaml_dump(config))
             os.sync()

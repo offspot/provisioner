@@ -56,7 +56,6 @@ def create_block_special_device(dev_path: str, major: int, minor: int):
     # consider success if errors as already existing
     if mknod.returncode == 1 and (mknod.stdout or "").strip().endswith(": File exists"):
         return
-    print(mknod.stdout)
     mknod.check_returncode()
 
 

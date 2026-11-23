@@ -8,6 +8,7 @@ from provisioner.provisioning.common import Environment, ImplementsProgress, Ste
 from provisioner.provisioning.docker import DockerStep
 from provisioner.provisioning.hwclock import HardwareClockStep
 from provisioner.provisioning.imager import PiImagerStep
+from provisioner.provisioning.offspotyaml import OffspotYAMLStep
 from provisioner.provisioning.resizepart import ResizePartitionStep
 
 context = Context.get()
@@ -20,7 +21,7 @@ class ProvisionManager:
         PiImagerStep,
         EnableChargerStep,
         ResizePartitionStep,
-        # OffspotYAMLStep,  # no update ATM
+        OffspotYAMLStep,
         DockerStep,
         BootOrderStep,
     )
