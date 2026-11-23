@@ -19,8 +19,10 @@ def text_for(net: WiFiNetwork) -> list[str | tuple[Hashable, str]]:
     connected = "[Connected] " if net.connected else ""
     return [
         (f"{net.signal_code}-signal", f"{net.signal_symbol} "),
-        f"{connected}{net.name} – "  # noqa: RUF001
-        f"{net.security} ({net.freq})",
+        (
+            f"{connected}{net.name} – "  # noqa: RUF001
+            f"{net.security} ({net.freq})"
+        ),
     ]
 
 
@@ -128,13 +130,17 @@ class NetworkPane(Pane):
             ]
         elif eth0:
             connected_text += [
-                "✅ Connected via Ethernet (wired) –"  # noqa: RUF001
-                f" IP: {eth0.ip4_address}"
+                (
+                    "✅ Connected via Ethernet (wired) –"  # noqa: RUF001
+                    f" IP: {eth0.ip4_address}"
+                )
             ]
         elif wlan0:
             connected_text += [
-                "✅ Connected via WiFi “{wlan0.name}” –"  # noqa: RUF001
-                f" IP: {eth0.ip4_address}"
+                (
+                    "✅ Connected via WiFi “{wlan0.name}” –"  # noqa: RUF001
+                    f" IP: {eth0.ip4_address}"
+                )
             ]
         else:
             connected_text += [
