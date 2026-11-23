@@ -118,6 +118,7 @@ class BlockDevicesManager:
             return [], []
 
         images: list[ImageFileInfo] = []
+        excluded_images: list[ExcludedImage] = []
 
         # build list of to-consider devices: exfat disk or partitions
         devices: list[Device] = []
@@ -145,7 +146,6 @@ class BlockDevicesManager:
 
             # find all *.img files within mountpoint
             # exclude files that are too small
-            excluded_images: list[ExcludedImage] = []
             for fpath in mountpoint.rglob("*.img"):
                 if fpath.is_relative_to(mountpoint.joinpath("ignored")):
                     excluded_images.append(
