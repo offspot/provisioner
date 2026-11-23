@@ -9,6 +9,7 @@ from provisioner.provisioning.docker import DockerStep
 from provisioner.provisioning.hwclock import HardwareClockStep
 from provisioner.provisioning.imager import PiImagerStep
 from provisioner.provisioning.offspotyaml import OffspotYAMLStep
+from provisioner.provisioning.pcie import EnablePCIExpressGen3Step
 from provisioner.provisioning.resizepart import ResizePartitionStep
 
 context = Context.get()
@@ -20,6 +21,7 @@ class ProvisionManager:
         HardwareClockStep,
         PiImagerStep,
         EnableChargerStep,
+        EnablePCIExpressGen3Step,
         ResizePartitionStep,
         OffspotYAMLStep,
         DockerStep,
