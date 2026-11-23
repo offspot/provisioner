@@ -97,7 +97,7 @@ class NetworkPane(Pane):
             min_width=50,
         )
         self.append_to(pile, decorated_menu)
-        pile.focus_item = decorated_menu
+        pile.focus_position = len(pile.contents) - 1
 
         # request spinner text to animate
         self.loading_text.animate(self.uloop)

@@ -17,7 +17,7 @@ jobs:
         run: sudo apt update && sudo apt-get install -y libparted-dev
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version-file: pyproject.toml
           architecture: x64

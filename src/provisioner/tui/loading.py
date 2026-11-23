@@ -127,7 +127,6 @@ class LoadingPane(Pane):
                 (uw.WHSettings.WEIGHT, 25, True),
             ),
         )
-        self.menu.focus_col = 0
         self.menu.focus_position = 0
         self.update()
         self.status = "ready"
