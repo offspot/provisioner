@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `change_bootorder` capability now added as a step
+- PCIeGen3 support in target config.txt via dtparam as a step
+- `provisioner-nvme` script. Useful for debugging. Mounts/unmounts NVME drive.
+
 ## [1.1.0] - 2026-11-03
 
 ## Added

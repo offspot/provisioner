@@ -89,6 +89,10 @@ class Device:
     def is_exfat(self) -> bool:
         return self.fstype == "exfat"
 
+    @property
+    def nickname(self) -> str:
+        return self.partlabel or self.label or f"part{self.partnum}"
+
 
 @define(kw_only=True, auto_attribs=True, auto_detect=True)
 class Partition(Device):
